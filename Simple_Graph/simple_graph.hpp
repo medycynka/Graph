@@ -78,11 +78,11 @@ public:
     inline bool                           removeVertex(size_t vertex_id);
     inline bool                           removeEdge(size_t vertex1_id, size_t vertex2_id);
     inline void                           printNeighborhoodMatrix() const;
-    inline bool                           edgeExist(size_t vertex1_id, size_t vertex2_id)              const { return neigh_matrix[vertex1_id][vertex2_id]; };
-    inline size_t                         nrOfVertices()                                               const { return vertices.size(); };
-    inline size_t                         nrOfEdges()                                                  const { return no_of_edges; };
-    inline                                VerticesIterator vertex(std::size_t vertex_id)                     { return VerticesIterator(*this, vertex_id); };
-    inline                                EdgesIterator edge(std::size_t vertex1_id, std::size_t vertex2_id) { return EdgesIterator(*this, vertex1_id, vertex2_id); };
+    inline bool                           edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
+    inline size_t                         nrOfVertices()                                  const { return vertices.size(); };
+    inline size_t                         nrOfEdges()                                     const { return no_of_edges; };
+    inline VerticesIterator               vertex(std::size_t vertex_id)                         { return VerticesIterator(*this, vertex_id); };
+    inline EdgesIterator                  edge(std::size_t vertex1_id, std::size_t vertex2_id)  { return EdgesIterator(*this, vertex1_id, vertex2_id); };
 
     inline VerticesIterator begin()         { return beginVertices(); };
     inline VerticesIterator end()           { return endVertices(); };
