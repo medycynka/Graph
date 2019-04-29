@@ -16,11 +16,12 @@ private:
             Graph<V, E> &reference;
 
             VerticesIterator(Graph<V, E> &graph, std::size_t current_vertex_id) : reference(graph), curr_It(current_vertex_id){};
-            VerticesIterator(const VerticesIterator &s)                         : reference(s.reference), curr_It(s.curr_It){};
-            VerticesIterator(VerticesIterator &&s) noexcept                     : reference(s.reference), curr_It(s.curr_It){};
 
         public:
             friend class Graph;
+
+			VerticesIterator(const VerticesIterator &s)                         : reference(s.reference), curr_It(s.curr_It){};
+            VerticesIterator(VerticesIterator &&s) noexcept                     : reference(s.reference), curr_It(s.curr_It){};
 
             bool                   operator==(const VerticesIterator &vi) const { return (curr_It == vi.curr_It && reference == vi.reference); };
             bool                   operator!=(const VerticesIterator &vi) const { return !(*this == vi); };
@@ -38,15 +39,29 @@ private:
         protected:
             size_t curr_row;
             size_t curr_col;
-            size_t pom = 0;             //iloœæ "odwiedzonych" pól macierzy s¹siedztwa
             Graph<V, E> &reference;
 
-            EdgesIterator(const EdgesIterator &s)                                     : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
-            EdgesIterator(EdgesIterator &&s) noexcept                                 : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
+            EdgesIterator(Graph<V, E> &graph) : reference(graph), curr_row(0), curr_col(0){bool checker = (reference.neigh_matrix.at(curr_row).at(curr_col) ? true : false);
+
+	while(!checker){
+        curr_col++;
+
+        if(curr_col == reference.neigh_matrix.size()){
+            curr_row++;
+            curr_col = 0;
+        }
+        if(curr_row == reference.neigh_matrix.size()) checker = true;
+        else if(reference.neigh_matrix.at(curr_row).at(curr_col)) checker = true;}};
+
             EdgesIterator(Graph<V, E> &graph, std::size_t nm_row, std::size_t nm_col) : reference(graph), curr_row(nm_row), curr_col(nm_col){};
 
         public:
             friend class Graph;
+
+			EdgesIterator(const EdgesIterator &s)                                     : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
+			EdgesIterator(EdgesIterator &&s) noexcept                                 : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
+
+			std::pair<size_t, size_t> get_row_col(){ return std::make_pair(curr_row, curr_col); };
 
             bool                operator==(const EdgesIterator &ei) const { return (curr_row == ei.curr_row && curr_col == ei.curr_col && reference == ei.reference); };
             bool                operator!=(const EdgesIterator &ei) const { return !(*this == ei); };
@@ -78,6 +93,7 @@ public:
     inline bool                           removeVertex(size_t vertex_id);
     inline bool                           removeEdge(size_t vertex1_id, size_t vertex2_id);
     inline void                           printNeighborhoodMatrix() const;
+	inline void                           dfs();
     inline bool                           edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
     inline size_t                         nrOfVertices()                                  const { return vertices.size(); };
     inline size_t                         nrOfEdges()                                     const { return no_of_edges; };
@@ -88,8 +104,8 @@ public:
     inline VerticesIterator end()           { return endVertices(); };
     inline VerticesIterator beginVertices() { return VerticesIterator(*this, 0); };
     inline VerticesIterator endVertices()   { return VerticesIterator(*this, vertices.size()); };
-    inline EdgesIterator    beginEdges()    { return EdgesIterator(*this, 0, 0); };
-    inline EdgesIterator    endEdges()      { return EdgesIterator(*this, vertices.size()-1, vertices.size()-1); };
+    inline EdgesIterator    beginEdges()    { return EdgesIterator(*this); };
+    inline EdgesIterator    endEdges()      { return EdgesIterator(*this, neigh_matrix.size(), 0); };
 
 private:
     std::vector<V> vertices;
@@ -143,30 +159,20 @@ typename Graph<V, E>::VerticesIterator &Graph<V, E>::VerticesIterator::operator-
 
 template<typename V, typename E>
 typename Graph<V, E>::EdgesIterator &Graph<V, E>::EdgesIterator::operator++(){
-    if(curr_col < reference.vertices.size()-1){
+	bool checker = false;
+
+	while(!checker){
         curr_col++;
-        pom++;
 
-        while(!reference.neigh_matrix.at(curr_row).at(curr_col) && curr_col < reference.nrOfVertices()-1){
-            curr_col++;
-            pom++;
+        if(curr_col == reference.nrOfVertices()){
+            curr_row++;
+            curr_col = 0;
         }
-    }
-    else if(pom < (reference.nrOfVertices() * reference.nrOfVertices())){
-        curr_col = 0;
-        curr_row++;
-
-        while(!reference.neigh_matrix.at(curr_row).at(curr_col) && curr_col < reference.nrOfVertices()-1){
-            curr_col++;
-            pom++;
-        }
-    }
-    else{
-        curr_col = reference.nrOfVertices();
-        curr_row = reference.nrOfVertices();
-    }
-
-    return *this;
+        if(curr_row == reference.nrOfVertices()) checker = true;
+		else if(reference.neigh_matrix.at(curr_row).at(curr_col)) checker = true;
+	}
+	
+	return *this;
 }
 
 template<typename V, typename E>
@@ -255,11 +261,18 @@ template <typename V, typename E>
 inline void Graph<V, E>::printNeighborhoodMatrix() const{
     for(int i = 0; i < neigh_matrix.size(); ++i){
         for(int j = 0; j < neigh_matrix[i].size(); ++j){
-            if(neigh_matrix[i][j]) std::cout << "[" << neigh_matrix[i][j].value() << "] ";
-            else std::cout << "[0] ";
+            if(neigh_matrix[i][j]) std::cout << neigh_matrix[i][j].value() << " ";
+            else std::cout << "0 ";
         }
         std::cout << std::endl;
     }
+}
+
+template <typename V, typename E>
+inline void Graph<V, E>::dfs(){
+	std::vector<bool> visited(vertices.size());
+
+	
 }
 
 #endif //SIMPLE_GRAPH_SIMPLE_GRAPH_HPP
