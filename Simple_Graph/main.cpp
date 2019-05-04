@@ -46,7 +46,10 @@ int main(){
 
     std::function<void(std::string)> func = [](std::string s){ std::cout << s << ", "; };
     g.dfs(1, func);
-
     std::cout << std::endl << std::endl;
     g.bfs(1, func);
+
+    std::cout << std::endl << std::endl;
+
+    g.dijkstraShortestPath(1);
 }

@@ -10,6 +10,9 @@
 #include <algorithm>
 #include <stack>
 #include <queue>
+#include <limits>
+
+const double INF = std::numeric_limits<double>::max();
 
 template <typename V, typename E>
 class Graph{
@@ -90,6 +93,11 @@ public:
     inline void                           printNeighborhoodMatrix() const;
     inline void                           dfs(size_t start, std::function<void(const V&)> visitator_f);
     inline void                           bfs(size_t start, std::function<void(const V&)> visitator_f);
+
+    inline size_t                         getMinVertex(std::vector<bool> &vis, std::vector<double> &keys);
+    inline void                           dijkstraShortestPath(size_t source);
+    inline void                           printPath(size_t source, std::vector<double> &keys);
+
     inline bool                           edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
     inline size_t                         nrOfVertices()                                  const { return vertices.size(); };
     inline size_t                         nrOfEdges()                                     const { return no_of_edges; };
@@ -332,6 +340,56 @@ void Graph<V, E>::bfs(size_t start, std::function<void(const V &)> visitator_f){
     }
 
     std::cout << std::endl;
+}
+
+template<typename V, typename E>
+size_t Graph<V, E>::getMinVertex(std::vector<bool> &vis, std::vector<double> &keys){
+    double minKey = INF;
+    int_fast32_t vertex = -1;
+
+    for(auto i = 0; i < nrOfVertices(); i++){
+        if(!vis.at(i) && minKey > keys.at(i)){
+            minKey = keys.at(i);
+            vertex = i;
+        }
+    }
+
+    return vertex;
+}
+
+template<typename V, typename E>
+void Graph<V, E>::dijkstraShortestPath(size_t source){
+    std::vector<bool> visited(nrOfVertices(), false);
+    std::vector<double> distance(nrOfVertices(), INF);
+    size_t temp1;
+    double temp2;
+
+    distance.at(source) = 0;
+
+    for(auto i = 0; i < nrOfVertices()-1; i++){
+        temp1 = getMinVertex(visited, distance);
+        visited.at(temp1) = true;
+
+        for(auto j = 0; j < nrOfVertices(); j++){
+            if(neigh_matrix.at(temp1).at(j).value_or(INF) > 0){
+                if(!visited.at(j) && neigh_matrix.at(temp1).at(j).value_or(INF) != INF){
+                    temp2 = neigh_matrix.at(temp1).at(j).value() + distance.at(temp1);
+
+                    if(temp2 < distance.at(j)) distance.at(j) = temp2;
+                }
+            }
+        }
+    }
+
+    printPath(source, distance);
+}
+
+template<typename V, typename E>
+void Graph<V, E>::printPath(size_t source, std::vector<double> &keys){
+    for(auto i = 0; i < nrOfVertices(); i++) {
+        if(keys.at(i) != INF) std::cout << "From vertex " << vertices.at(source) << " to " << vertices.at(i) << " distance = " << keys.at(i) << std::endl;
+        else std::cout << "From vertex " << vertices.at(source) << " couldn't reach vertex " << vertices.at(i) << " (no connection)" << std::endl;
+    }
 }
 
 #endif //SIMPLE_GRAPH_SIMPLE_GRAPH_HPP
