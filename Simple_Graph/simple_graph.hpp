@@ -94,9 +94,19 @@ public:
     inline void                           dfs(size_t start, std::function<void(const V&)> visitator_f);
     inline void                           bfs(size_t start, std::function<void(const V&)> visitator_f);
 
+    /** Graph's alghorithms */
     inline size_t                         getMinVertex(std::vector<bool> &vis, std::vector<double> &keys);
     inline void                           dijkstraShortestPath(size_t source);
-    inline void                           printPath(size_t source, std::vector<double> &keys);
+    inline void                           printPathDijkstra(size_t source, std::vector<double> &keys);
+    inline void                           computeFloydWarshall();
+    inline void                           printPathFloydWarshall(std::vector<std::vector<std::optional<E>>> &input);
+    inline bool                           checkEdge(size_t u, size_t v, std::vector<bool> &vis);
+    inline void                           primsMST();
+    /** Only for undirected graphs */
+    inline bool                           isValidForColors(size_t vertex_id, std::vector<size_t> &col, size_t col_checker);
+    inline bool                           tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col);
+    inline bool                           checkColoringResult(size_t nrOfColorsToTry);
+    inline void                           printColors(std::vector<size_t> &col);
 
     inline bool                           edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
     inline size_t                         nrOfVertices()                                  const { return vertices.size(); };
@@ -206,13 +216,13 @@ typename Graph<V, E>::EdgesIterator const Graph<V, E>::EdgesIterator::operator++
 }
 
 template <typename V, typename E>
-inline typename Graph<V, E>::VerticesIterator  Graph<V, E>::insertVertex(const V& vertex_data){
+inline typename Graph<V, E>::VerticesIterator Graph<V, E>::insertVertex(const V& vertex_data){
     vertices.push_back(vertex_data);
     neigh_matrix.resize(neigh_matrix.size() + 1);
     neigh_matrix.front().resize(neigh_matrix.front().size() + 1);
 
     for(auto i = 0; i < neigh_matrix.size(); i++){
-        neigh_matrix[i].resize(neigh_matrix.front().size());
+        neigh_matrix.at(i).resize(neigh_matrix.front().size());
     }
 
     for(auto it = beginVertices(); it != endVertices(); ++it){
@@ -224,7 +234,7 @@ inline typename Graph<V, E>::VerticesIterator  Graph<V, E>::insertVertex(const V
 
 template <typename V, typename E>
 inline std::pair<typename Graph<V, E>::EdgesIterator, bool> Graph<V, E>::insertEdge(size_t vertex1_id, size_t vertex2_id, const E &label, bool replace){
-    auto& currentEdge = neigh_matrix[vertex1_id][vertex2_id];
+    auto& currentEdge = neigh_matrix.at(vertex1_id).at(vertex2_id);
 
     if(currentEdge && replace){
         currentEdge = label;
@@ -249,16 +259,16 @@ inline bool Graph<V, E>::removeVertex(size_t vertex_id){
 
     vertices.erase(vertices.begin() + vertex_id);
 
-    for(auto i = 0; i < neigh_matrix[vertex_id].size(); i++){
+    for(auto i = 0; i < neigh_matrix.at(vertex_id).size(); i++){
         if(i != vertex_id){
-            if(neigh_matrix[vertex_id][i]) edges_to_erase++;
+            if(neigh_matrix.at(vertex_id).at(i)) edges_to_erase++;
         }
     }
 
     for(auto i = 0; i < neigh_matrix.size(); i++){
-        if(neigh_matrix[i][vertex_id]) edges_to_erase++;
+        if(neigh_matrix.at(i).at(vertex_id)) edges_to_erase++;
 
-        neigh_matrix[i].erase(neigh_matrix[i].begin() + vertex_id);
+        neigh_matrix.at(i).erase(neigh_matrix.at(i).begin() + vertex_id);
     }
 
     neigh_matrix.erase(neigh_matrix.begin() + vertex_id);
@@ -269,7 +279,7 @@ inline bool Graph<V, E>::removeVertex(size_t vertex_id){
 
 template <typename V, typename E>
 inline bool Graph<V, E>::removeEdge(size_t vertex1_id, size_t vertex2_id){
-    auto& currentEdge = neigh_matrix[vertex1_id][vertex2_id];
+    auto& currentEdge = neigh_matrix.at(vertex1_id).at(vertex2_id);
 
     if(!currentEdge) return false;
 
@@ -282,10 +292,11 @@ inline bool Graph<V, E>::removeEdge(size_t vertex1_id, size_t vertex2_id){
 template <typename V, typename E>
 inline void Graph<V, E>::printNeighborhoodMatrix() const{
     for(int i = 0; i < neigh_matrix.size(); ++i){
-        for(int j = 0; j < neigh_matrix[i].size(); ++j){
-            if(neigh_matrix[i][j]) std::cout << neigh_matrix[i][j].value() << " ";
+        for(int j = 0; j < neigh_matrix.at(i).size(); ++j){
+            if(neigh_matrix.at(i).at(j)) std::cout << neigh_matrix.at(i).at(j).value() << " ";
             else std::cout << "0 ";
         }
+
         std::cout << std::endl;
     }
 }
@@ -296,6 +307,8 @@ inline void Graph<V, E>::dfs(size_t start, std::function<void(const V&)> visitat
     std::stack<size_t> s;
     size_t current = start;
     size_t count = 0;
+
+    std::cout << "DFS algorithm:" << std::endl;
 
     while(count != nrOfVertices()){
         if(!visited.at(current)){
@@ -317,11 +330,13 @@ inline void Graph<V, E>::dfs(size_t start, std::function<void(const V&)> visitat
 }
 
 template<typename V, typename E>
-void Graph<V, E>::bfs(size_t start, std::function<void(const V &)> visitator_f){
+inline void Graph<V, E>::bfs(size_t start, std::function<void(const V &)> visitator_f){
     std::vector<bool> visited(vertices.size(), false);
     std::queue<size_t> s;
     size_t current = start;
     size_t count = 0;
+
+    std::cout << "BFS algorithm:" << std::endl;
 
     while(count != nrOfVertices()){
         if(!visited.at(current)){
@@ -343,7 +358,7 @@ void Graph<V, E>::bfs(size_t start, std::function<void(const V &)> visitator_f){
 }
 
 template<typename V, typename E>
-size_t Graph<V, E>::getMinVertex(std::vector<bool> &vis, std::vector<double> &keys){
+inline size_t Graph<V, E>::getMinVertex(std::vector<bool> &vis, std::vector<double> &keys){
     double minKey = INF;
     int_fast32_t vertex = -1;
 
@@ -358,7 +373,7 @@ size_t Graph<V, E>::getMinVertex(std::vector<bool> &vis, std::vector<double> &ke
 }
 
 template<typename V, typename E>
-void Graph<V, E>::dijkstraShortestPath(size_t source){
+inline void Graph<V, E>::dijkstraShortestPath(size_t source){
     std::vector<bool> visited(nrOfVertices(), false);
     std::vector<double> distance(nrOfVertices(), INF);
     size_t temp1;
@@ -381,15 +396,143 @@ void Graph<V, E>::dijkstraShortestPath(size_t source){
         }
     }
 
-    printPath(source, distance);
+    printPathDijkstra(source, distance);
 }
 
 template<typename V, typename E>
-void Graph<V, E>::printPath(size_t source, std::vector<double> &keys){
+inline void Graph<V, E>::printPathDijkstra(size_t source, std::vector<double> &keys){
     for(auto i = 0; i < nrOfVertices(); i++) {
         if(keys.at(i) != INF) std::cout << "From vertex " << vertices.at(source) << " to " << vertices.at(i) << " distance = " << keys.at(i) << std::endl;
         else std::cout << "From vertex " << vertices.at(source) << " couldn't reach vertex " << vertices.at(i) << " (no connection)" << std::endl;
     }
+}
+
+template<typename V, typename E>
+inline void Graph<V, E>::computeFloydWarshall(){
+    std::vector<std::vector<std::optional<E>>> temp = neigh_matrix;
+    double w = INF;
+
+    for(auto k = 0; k < nrOfVertices(); k++){
+        temp.at(k).at(k) = 0;
+
+        for(auto i = 0; i < nrOfVertices(); i++){
+            for(auto j = 0; j < nrOfVertices(); j++){
+                if(temp.at(i).at(k).value_or(INF) != INF || temp.at(k).at(j).value_or(INF) != INF){
+                    w = temp.at(i).at(k).value_or(INF) + temp.at(k).at(j).value_or(INF);
+                }
+
+                if(temp.at(i).at(j).value_or(INF) != INF && temp.at(i).at(j).value_or(INF) > w) temp[i][j] = w;
+            }
+        }
+    }
+
+    printPathFloydWarshall(temp);
+}
+
+template<typename V, typename E>
+inline void Graph<V, E>::printPathFloydWarshall(std::vector<std::vector<std::optional<E>>> &input) {
+    std::cout << "Shortest paths:" << std::endl;
+
+    for(auto i = 0; i < nrOfVertices(); i++){
+        for(auto j = 0; j < nrOfVertices(); j++){
+            std::cout << "From " << vertices.at(i) << " to " << vertices.at(j) << " = ";
+
+            if(input.at(i).at(j).value_or(INF) == INF) std::cout << "NO PATH";
+            else std::cout << input.at(i).at(j).value_or(INF);
+
+            std::cout << std::endl;
+        }
+    }
+}
+
+template<typename V, typename E>
+inline bool Graph<V, E>::checkEdge(size_t u, size_t v, std::vector<bool> &vis){
+    if( u == v || (!vis.at(u) && !vis.at(v)) ) return false;
+    else if(vis.at(u) && vis.at(v)) return false;
+    else return true;
+}
+
+template<typename V, typename E>
+inline void Graph<V, E>::primsMST(){
+    std::vector<bool> visited(nrOfVertices(), false);
+    size_t counter = 0;
+    double min_cost = 0;
+
+    visited.at(0) = true;
+
+    while(counter < nrOfVertices()-1){
+        auto min = INF;
+        auto a = -1;
+        auto b = -1;
+
+        for(auto i = 0; i < nrOfVertices(); i++){
+            for(auto j = 0; j < nrOfVertices(); j++){
+                if(neigh_matrix.at(i).at(j).value_or(INF) < min){
+                    if(checkEdge(i, j, visited)){
+                        min = neigh_matrix.at(i).at(j).value_or(INF);
+                        a = i;
+                        b = j;
+                    }
+                }
+            }
+        }
+
+        if(a != -1 && b != -1){
+            std::cout << "Edge: " << counter++ << " [" << a << ", " << b << "] cost: " << min << std::endl;
+            min_cost += min;
+            visited.at(a) = true;
+            visited.at(b) = true;
+        }
+    }
+
+    std::cout << "Minimum cost of MST = " << min_cost << std::endl;
+}
+
+template<typename V, typename E>
+inline bool Graph<V, E>::isValidForColors(size_t vertex_id, std::vector<size_t> &col, size_t col_checker) {
+    for(auto i = 0; i < nrOfVertices(); i++) if(neigh_matrix.at(vertex_id).at(i) && col_checker == col.at(i)) return false;
+
+    return true;
+}
+
+template<typename V, typename E>
+inline bool Graph<V, E>::tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col){
+    if(vertex_id == nrOfVertices()) return true;
+    
+    for(auto i = 1; i <= nrOfColorsToTry; i++){
+        if(isValidForColors(vertex_id, col, i)){
+            col.at(vertex_id) = i;
+
+            if(tryGraphColoring(nrOfColorsToTry, vertex_id+1, col)) return true;
+
+            col.at(vertex_id) = 0;
+        }
+    }
+
+    return false;
+}
+
+template<typename V, typename E>
+bool Graph<V, E>::checkColoringResult(size_t nrOfColorsToTry){
+    std::vector<size_t> colors(nrOfVertices(), 0);
+
+    if(!tryGraphColoring(nrOfColorsToTry, 0, colors)){
+        std::cout << "Couldn't find solution for " << nrOfColorsToTry << " colors" << std::endl;
+
+        return false;
+    }
+    else{
+        printColors(colors);
+
+        return true;
+    }
+}
+
+template<typename V, typename E>
+void Graph<V, E>::printColors(std::vector<size_t> &col){
+    std::cout << "Solution for coloring vertices:" << std::endl;
+
+    for(auto i = 0; i < nrOfVertices(); i++) std::cout << vertices.at(i) << " color: " << col.at(i) << std::endl;
 }
 
 #endif //SIMPLE_GRAPH_SIMPLE_GRAPH_HPP

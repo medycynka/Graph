@@ -50,6 +50,31 @@ int main(){
     g.bfs(1, func);
 
     std::cout << std::endl << std::endl;
-
     g.dijkstraShortestPath(1);
+    std::cout << std::endl << std::endl;
+    g.computeFloydWarshall();
+    std::cout << std::endl << std::endl;
+    g.primsMST();
+    std::cout << std::endl << std::endl;
+
+    Graph<int, int> g2;
+    g2.insertVertex(0);
+    g2.insertVertex(1);
+    g2.insertVertex(2);
+    g2.insertVertex(3);
+    g2.insertEdge(0, 1, 1);
+    g2.insertEdge(0, 2, 1);
+    g2.insertEdge(0, 3, 1);
+    g2.insertEdge(1, 0, 1);
+    g2.insertEdge(1, 2, 1);
+    g2.insertEdge(2, 0, 1);
+    g2.insertEdge(2, 1, 1);
+    g2.insertEdge(2, 3, 1);
+    g2.insertEdge(3, 2, 1);
+    g2.insertEdge(3, 0, 1);
+
+    g2.printNeighborhoodMatrix();
+    g2.checkColoringResult(1);
+    g2.checkColoringResult(2);
+    g2.checkColoringResult(3);
 }
