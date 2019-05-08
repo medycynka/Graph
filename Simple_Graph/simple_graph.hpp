@@ -106,6 +106,8 @@ public:
     /** Only for directed graphs */
     inline bool                           checkVerticesDFS_undirected(size_t curr, std::set<size_t> &wSet, std::set<size_t> &gSet, std::set<size_t> &bSet);
     inline bool                           hasCycle_undirected();
+    inline ssize_t                        getInDegree(size_t vertex_id);
+    inline ssize_t                        getOutDegree(size_t vertex_id);
     /** Only for undirected graphs */
     inline bool                           isValidForColors(size_t vertex_id, std::vector<size_t> &col, size_t col_checker);
     inline bool                           tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col);
@@ -113,6 +115,11 @@ public:
     inline void                           printColors(std::vector<size_t> &col);
     inline bool                           checkVerticesDFS_directed(size_t curr, std::set<size_t> &vis, size_t parent);
     inline bool                           hasCycle_directed();
+    inline bool                           isSafeVertex(size_t vertex_id, std::vector<ssize_t> &path, size_t pos);
+    inline bool                           tryFindingHamCycle(std::vector<ssize_t> &path, size_t pos);
+    inline bool                           hasHamiltonCycle(size_t startingVertex);
+    inline void                           printHamiltonCycle(std::vector<ssize_t> &path);
+    inline ssize_t                        getDegree(size_t vertex_id);
 
     inline bool                           edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
     inline size_t                         nrOfVertices()                                  const { return vertices.size(); };
@@ -597,7 +604,7 @@ inline bool Graph<V, E>::checkVerticesDFS_directed(size_t curr, std::set<size_t>
 }
 
 template<typename V, typename E>
-bool Graph<V, E>::hasCycle_directed() {
+inline bool Graph<V, E>::hasCycle_directed() {
     std::set<size_t> checker;
 
     for(auto i = 0; i < nrOfVertices(); i++){
@@ -607,6 +614,93 @@ bool Graph<V, E>::hasCycle_directed() {
     }
 
     return false;
+}
+
+template<typename V, typename E>
+inline bool Graph<V, E>::isSafeVertex(size_t vertex_id, std::vector<ssize_t> &path, size_t pos) {
+    if(!neigh_matrix.at(path.at(pos-1)).at(vertex_id)) return false;
+
+    for(auto i = 0; i < pos; i++) if(path.at(i) == vertex_id) return false;
+
+    return true;
+}
+
+template<typename V, typename E>
+inline bool Graph<V, E>::tryFindingHamCycle(std::vector<ssize_t> &path, size_t pos) {
+    if(pos == nrOfVertices()) return (neigh_matrix.at(path.at(pos-1)).at(path.at(0)) ? true : false);
+
+    for(auto i = 1; i < nrOfVertices(); i++){
+        if(isSafeVertex(i, path, pos)){
+            path.at(pos) = i;
+
+            if(tryFindingHamCycle(path, pos+1)) return true;
+
+            path.at(pos) = -1;
+        }
+    }
+
+    return false;
+}
+
+template<typename V, typename E>
+inline bool Graph<V, E>::hasHamiltonCycle(size_t startingVertex){
+    std::vector<ssize_t> path(nrOfVertices(), -1);
+    path.at(0) = 0;
+
+    if(!tryFindingHamCycle(path, startingVertex)){
+        std::cout << "This graph doesn't have Hamilton cycles" << std::endl;
+
+        return false;
+    }
+    else{
+        printHamiltonCycle(path);
+
+        return true;
+    }
+}
+
+template<typename V, typename E>
+inline void Graph<V, E>::printHamiltonCycle(std::vector<ssize_t> &path){
+    std::cout << "Hamilton cycle:" << std::endl;
+
+    for(auto i = 0; i < nrOfVertices(); i++) std::cout << path.at(i) << ", ";
+    std::cout << path.at(0) << std::endl;
+}
+
+template<typename V, typename E>
+inline ssize_t Graph<V, E>::getInDegree(size_t vertex_id){
+    if(vertex_id >= nrOfVertices()) return -1;
+    else{
+        ssize_t degree = 0;
+
+        for(auto i = 0; i < nrOfVertices(); i++) if(neigh_matrix.at(i).at(vertex_id)) degree++;
+
+        return degree;
+    }
+}
+
+template<typename V, typename E>
+inline ssize_t Graph<V, E>::getOutDegree(size_t vertex_id){
+    if(vertex_id >= nrOfVertices()) return -1;
+    else{
+        ssize_t degree = 0;
+
+        for(auto i = 0; i < nrOfVertices(); i++) if(neigh_matrix.at(vertex_id).at(i)) degree++;
+
+        return degree;
+    }
+}
+
+template<typename V, typename E>
+ssize_t Graph<V, E>::getDegree(size_t vertex_id) {
+    if(vertex_id >= nrOfVertices()) return -1;
+    else{
+        ssize_t degree = 0;
+
+        for(auto i = 0; i < nrOfVertices(); i++) if(neigh_matrix.at(vertex_id).at(i)) degree++;
+
+        return degree;
+    }
 }
 
 #endif //SIMPLE_GRAPH_SIMPLE_GRAPH_HPP

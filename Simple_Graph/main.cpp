@@ -55,7 +55,10 @@ int main(){
     g.computeFloydWarshall();
     std::cout << std::endl << std::endl;
     g.primsMST();
-    std::cout << std::endl << (g.hasCycle_undirected() ? "Graph g has cycle" : "Graph g doesn't have cycles") << std::endl << std::endl;
+    std::cout << std::endl << (g.hasCycle_undirected() ? "Graph g has cycle" : "Graph g doesn't have cycles") << std::endl;
+    std::cout << "Vertex " << *g.vertex(0) << " has " << g.getInDegree(0) << " \"in-vertex\" and " << g.getOutDegree(0) << " \"out-vertices\"" << std::endl << std::endl;
+
+
 
     Graph<int, int> g2;
     g2.insertVertex(0);
@@ -77,7 +80,11 @@ int main(){
     g2.checkColoringResult(1);
     g2.checkColoringResult(2);
     g2.checkColoringResult(3);
-    std::cout << std::endl << (g2.hasCycle_directed() ? "Graph g2 has cycle" : "Graph g2 doesn't have cycles") << std::endl << std::endl;
+    std::cout << std::endl << (g2.hasCycle_directed() ? "Graph g2 has cycle" : "Graph g2 doesn't have cycles") << std::endl;
+    g2.hasHamiltonCycle(1);
+    std::cout << "Vertex " << *g2.vertex(0) << " has degree = " << g2.getDegree(0) << std::endl << std::endl;
+
+
 
     Graph<int, int> g3;
     g3.insertVertex(0);
@@ -87,6 +94,23 @@ int main(){
     g3.insertEdge(0, 2, 1);
     g3.insertEdge(2, 1, 1);
     g3.printNeighborhoodMatrix();
-    std::cout << std::endl << (g3.hasCycle_undirected() ? "Graph g3 has cycle" : "Graph g3 doesn't have cycles") << std::endl;
+    std::cout << std::endl << (g3.hasCycle_undirected() ? "Graph g3 has cycle" : "Graph g3 doesn't have cycles") << std::endl << std::endl;
 
+
+    
+    Graph<int, int> g4;
+    g4.insertVertex(0);
+    g4.insertVertex(1);
+    g4.insertVertex(2);
+    g4.insertVertex(3);
+    g4.insertEdge(0, 1, 1);
+    g4.insertEdge(0, 2, 1);
+    g4.insertEdge(0, 3, 1);
+    g4.insertEdge(1, 0, 1);
+    g4.insertEdge(2, 0, 1);
+    g4.insertEdge(2, 3, 1);
+    g4.insertEdge(3, 2, 1);
+    g4.insertEdge(3, 0, 1);
+    g4.printNeighborhoodMatrix();
+    g4.hasHamiltonCycle(1);
 }
