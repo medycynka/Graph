@@ -87,8 +87,8 @@ public:
     bool operator==(const Graph &other) { return (no_of_edges == other.no_of_edges && vertices == other.vertices && neigh_matrix == other.neigh_matrix); };
     bool operator!=(const Graph &other) { return !(*this == other); };
 
-    inline VerticesIterator               insertVertex (const V& vertex_data);
-    inline std::pair<EdgesIterator, bool> insertEdge (size_t vertex1_id, size_t vertex2_id, const E &label = E(), bool replace = true);
+    inline VerticesIterator               insertVertex(const V& vertex_data);
+    inline std::pair<EdgesIterator, bool> insertEdge(size_t vertex1_id, size_t vertex2_id, const E &label = E(), bool replace = true);
     inline bool                           removeVertex(size_t vertex_id);
     inline bool                           removeEdge(size_t vertex1_id, size_t vertex2_id);
     inline void                           printNeighborhoodMatrix() const;
@@ -692,7 +692,7 @@ inline ssize_t Graph<V, E>::getOutDegree(size_t vertex_id){
 }
 
 template<typename V, typename E>
-ssize_t Graph<V, E>::getDegree(size_t vertex_id) {
+inline ssize_t Graph<V, E>::getDegree(size_t vertex_id){
     if(vertex_id >= nrOfVertices()) return -1;
     else{
         ssize_t degree = 0;

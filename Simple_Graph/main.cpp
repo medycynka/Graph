@@ -97,7 +97,7 @@ int main(){
     std::cout << std::endl << (g3.hasCycle_undirected() ? "Graph g3 has cycle" : "Graph g3 doesn't have cycles") << std::endl << std::endl;
 
 
-    
+
     Graph<int, int> g4;
     g4.insertVertex(0);
     g4.insertVertex(1);
