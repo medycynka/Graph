@@ -55,7 +55,7 @@ int main(){
     g.computeFloydWarshall();
     std::cout << std::endl << std::endl;
     g.primsMST();
-    std::cout << std::endl << std::endl;
+    std::cout << std::endl << (g.hasCycle_undirected() ? "Graph g has cycle" : "Graph g doesn't have cycles") << std::endl << std::endl;
 
     Graph<int, int> g2;
     g2.insertVertex(0);
@@ -77,4 +77,16 @@ int main(){
     g2.checkColoringResult(1);
     g2.checkColoringResult(2);
     g2.checkColoringResult(3);
+    std::cout << std::endl << (g2.hasCycle_directed() ? "Graph g2 has cycle" : "Graph g2 doesn't have cycles") << std::endl << std::endl;
+
+    Graph<int, int> g3;
+    g3.insertVertex(0);
+    g3.insertVertex(1);
+    g3.insertVertex(2);
+    g3.insertEdge(0, 1, 1);
+    g3.insertEdge(0, 2, 1);
+    g3.insertEdge(2, 1, 1);
+    g3.printNeighborhoodMatrix();
+    std::cout << std::endl << (g3.hasCycle_undirected() ? "Graph g3 has cycle" : "Graph g3 doesn't have cycles") << std::endl;
+
 }

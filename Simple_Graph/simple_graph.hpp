@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <stack>
 #include <queue>
+#include <set>
 #include <limits>
 
 const double INF = std::numeric_limits<double>::max();
@@ -102,11 +103,16 @@ public:
     inline void                           printPathFloydWarshall(std::vector<std::vector<std::optional<E>>> &input);
     inline bool                           checkEdge(size_t u, size_t v, std::vector<bool> &vis);
     inline void                           primsMST();
+    /** Only for directed graphs */
+    inline bool                           checkVerticesDFS_undirected(size_t curr, std::set<size_t> &wSet, std::set<size_t> &gSet, std::set<size_t> &bSet);
+    inline bool                           hasCycle_undirected();
     /** Only for undirected graphs */
     inline bool                           isValidForColors(size_t vertex_id, std::vector<size_t> &col, size_t col_checker);
     inline bool                           tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col);
     inline bool                           checkColoringResult(size_t nrOfColorsToTry);
     inline void                           printColors(std::vector<size_t> &col);
+    inline bool                           checkVerticesDFS_directed(size_t curr, std::set<size_t> &vis, size_t parent);
+    inline bool                           hasCycle_directed();
 
     inline bool                           edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
     inline size_t                         nrOfVertices()                                  const { return vertices.size(); };
@@ -513,7 +519,7 @@ inline bool Graph<V, E>::tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_
 }
 
 template<typename V, typename E>
-bool Graph<V, E>::checkColoringResult(size_t nrOfColorsToTry){
+inline bool Graph<V, E>::checkColoringResult(size_t nrOfColorsToTry){
     std::vector<size_t> colors(nrOfVertices(), 0);
 
     if(!tryGraphColoring(nrOfColorsToTry, 0, colors)){
@@ -529,10 +535,78 @@ bool Graph<V, E>::checkColoringResult(size_t nrOfColorsToTry){
 }
 
 template<typename V, typename E>
-void Graph<V, E>::printColors(std::vector<size_t> &col){
+inline void Graph<V, E>::printColors(std::vector<size_t> &col){
     std::cout << "Solution for coloring vertices:" << std::endl;
 
     for(auto i = 0; i < nrOfVertices(); i++) std::cout << vertices.at(i) << " color: " << col.at(i) << std::endl;
+}
+
+template<typename V, typename E>
+inline bool Graph<V, E>::checkVerticesDFS_undirected(size_t curr, std::set<size_t> &wSet, std::set<size_t> &gSet, std::set<size_t> &bSet) {
+    wSet.erase(wSet.find(curr));
+    gSet.insert(curr);
+
+    for(auto i = 0; i < nrOfVertices(); i++){
+        if(neigh_matrix.at(curr).at(i)){
+            if(bSet.find(i) != bSet.end()) continue;
+
+            if(gSet.find(i) != gSet.end()) return true;
+
+            if(checkVerticesDFS_undirected(i, wSet, gSet, bSet)) return true;
+        }
+    }
+
+    gSet.erase(gSet.find(curr));
+    bSet.insert(curr);
+
+    return false;
+}
+
+template<typename V, typename E>
+inline bool Graph<V, E>::hasCycle_undirected() {
+    std::set<size_t> whiteSet, greySey, blackSet;
+
+    for(auto i = 0; i < nrOfVertices(); i++) whiteSet.insert(i);
+
+    while(!whiteSet.empty()){
+        for(auto i = 0; i < nrOfVertices(); i++){
+            if(whiteSet.find(i) != whiteSet.end()){
+                if(checkVerticesDFS_undirected(i, whiteSet, greySey, blackSet)) return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+template<typename V, typename E>
+inline bool Graph<V, E>::checkVerticesDFS_directed(size_t curr, std::set<size_t> &vis, size_t parent) {
+    vis.insert(curr);
+
+    for(auto i = 0; i < nrOfVertices(); i++){
+        if(neigh_matrix.at(curr).at(i)){
+            if(i == parent) continue;
+
+            if(vis.find(i) != vis.end()) return true;
+
+            if(checkVerticesDFS_directed(i, vis, curr)) return true;
+        }
+    }
+
+    return false;
+}
+
+template<typename V, typename E>
+bool Graph<V, E>::hasCycle_directed() {
+    std::set<size_t> checker;
+
+    for(auto i = 0; i < nrOfVertices(); i++){
+        if(checker.find(i) != checker.end()) continue;
+
+        if(checkVerticesDFS_directed(i, checker, -1)) return true;
+    }
+
+    return false;
 }
 
 #endif //SIMPLE_GRAPH_SIMPLE_GRAPH_HPP
