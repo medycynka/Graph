@@ -1,6 +1,4 @@
 #include "simple_graph.hpp"
-#include <iostream>
-#include <vector>
 
 using namespace std;
 

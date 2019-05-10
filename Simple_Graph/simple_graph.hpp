@@ -96,30 +96,30 @@ public:
     inline void                           bfs(size_t start, std::function<void(const V&)> visitator_f);
 
     /** Graph's alghorithms */
-    inline size_t                         getMinVertex(std::vector<bool> &vis, std::vector<double> &keys);
-    inline void                           dijkstraShortestPath(size_t source);
-    inline void                           printPathDijkstra(size_t source, std::vector<double> &keys);
-    inline void                           computeFloydWarshall();
-    inline void                           printPathFloydWarshall(std::vector<std::vector<std::optional<E>>> &input);
-    inline bool                           checkEdge(size_t u, size_t v, std::vector<bool> &vis);
-    inline void                           primsMST();
+    inline size_t                         getMinVertex(std::vector<bool> &vis, std::vector<double> &keys) const;
+    inline void                           dijkstraShortestPath(size_t source) const;
+    inline void                           printPathDijkstra(size_t source, std::vector<double> &keys) const;
+    inline void                           computeFloydWarshall() const;
+    inline void                           printPathFloydWarshall(std::vector<std::vector<std::optional<E>>> &input) const;
+    inline bool                           checkEdge(size_t u, size_t v, std::vector<bool> &vis) const;
+    inline void                           primsMST() const;
     /** Only for directed graphs */
-    inline bool                           checkVerticesDFS_undirected(size_t curr, std::set<size_t> &wSet, std::set<size_t> &gSet, std::set<size_t> &bSet);
-    inline bool                           hasCycle_undirected();
-    inline ssize_t                        getInDegree(size_t vertex_id);
-    inline ssize_t                        getOutDegree(size_t vertex_id);
+    inline bool                           checkVerticesDFS_undirected(size_t curr, std::set<size_t> &wSet, std::set<size_t> &gSet, std::set<size_t> &bSet) const;
+    inline bool                           hasCycle_undirected() const;
+    inline ssize_t                        getInDegree(size_t vertex_id) const;
+    inline ssize_t                        getOutDegree(size_t vertex_id) const;
     /** Only for undirected graphs */
-    inline bool                           isValidForColors(size_t vertex_id, std::vector<size_t> &col, size_t col_checker);
-    inline bool                           tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col);
-    inline bool                           checkColoringResult(size_t nrOfColorsToTry);
-    inline void                           printColors(std::vector<size_t> &col);
-    inline bool                           checkVerticesDFS_directed(size_t curr, std::set<size_t> &vis, size_t parent);
-    inline bool                           hasCycle_directed();
-    inline bool                           isSafeVertex(size_t vertex_id, std::vector<ssize_t> &path, size_t pos);
-    inline bool                           tryFindingHamCycle(std::vector<ssize_t> &path, size_t pos);
-    inline bool                           hasHamiltonCycle(size_t startingVertex);
-    inline void                           printHamiltonCycle(std::vector<ssize_t> &path);
-    inline ssize_t                        getDegree(size_t vertex_id);
+    inline bool                           isValidForColors(size_t vertex_id, std::vector<size_t> &col, size_t col_checker) const;
+    inline bool                           tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col) const;
+    inline bool                           checkColoringResult(size_t nrOfColorsToTry) const;
+    inline void                           printColors(std::vector<size_t> &col) const;
+    inline bool                           checkVerticesDFS_directed(size_t curr, std::set<size_t> &vis, size_t parent) const;
+    inline bool                           hasCycle_directed() const;
+    inline bool                           isSafeVertex(size_t vertex_id, std::vector<ssize_t> &path, size_t pos) const;
+    inline bool                           tryFindingHamCycle(std::vector<ssize_t> &path, size_t pos) const;
+    inline bool                           hasHamiltonCycle(size_t startingVertex) const;
+    inline void                           printHamiltonCycle(std::vector<ssize_t> &path) const;
+    inline ssize_t                        getDegree(size_t vertex_id)                     const { return getOutDegree(vertex_id); };
 
     inline bool                           edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
     inline size_t                         nrOfVertices()                                  const { return vertices.size(); };
@@ -371,7 +371,7 @@ inline void Graph<V, E>::bfs(size_t start, std::function<void(const V &)> visita
 }
 
 template<typename V, typename E>
-inline size_t Graph<V, E>::getMinVertex(std::vector<bool> &vis, std::vector<double> &keys){
+inline size_t Graph<V, E>::getMinVertex(std::vector<bool> &vis, std::vector<double> &keys) const{
     double minKey = INF;
     int_fast32_t vertex = -1;
 
@@ -386,7 +386,7 @@ inline size_t Graph<V, E>::getMinVertex(std::vector<bool> &vis, std::vector<doub
 }
 
 template<typename V, typename E>
-inline void Graph<V, E>::dijkstraShortestPath(size_t source){
+inline void Graph<V, E>::dijkstraShortestPath(size_t source) const{
     std::vector<bool> visited(nrOfVertices(), false);
     std::vector<double> distance(nrOfVertices(), INF);
     size_t temp1;
@@ -413,7 +413,7 @@ inline void Graph<V, E>::dijkstraShortestPath(size_t source){
 }
 
 template<typename V, typename E>
-inline void Graph<V, E>::printPathDijkstra(size_t source, std::vector<double> &keys){
+inline void Graph<V, E>::printPathDijkstra(size_t source, std::vector<double> &keys) const{
     for(auto i = 0; i < nrOfVertices(); i++) {
         if(keys.at(i) != INF) std::cout << "From vertex " << vertices.at(source) << " to " << vertices.at(i) << " distance = " << keys.at(i) << std::endl;
         else std::cout << "From vertex " << vertices.at(source) << " couldn't reach vertex " << vertices.at(i) << " (no connection)" << std::endl;
@@ -421,7 +421,7 @@ inline void Graph<V, E>::printPathDijkstra(size_t source, std::vector<double> &k
 }
 
 template<typename V, typename E>
-inline void Graph<V, E>::computeFloydWarshall(){
+inline void Graph<V, E>::computeFloydWarshall() const{
     std::vector<std::vector<std::optional<E>>> temp = neigh_matrix;
     double w = INF;
 
@@ -443,7 +443,7 @@ inline void Graph<V, E>::computeFloydWarshall(){
 }
 
 template<typename V, typename E>
-inline void Graph<V, E>::printPathFloydWarshall(std::vector<std::vector<std::optional<E>>> &input) {
+inline void Graph<V, E>::printPathFloydWarshall(std::vector<std::vector<std::optional<E>>> &input) const{
     std::cout << "Shortest paths:" << std::endl;
 
     for(auto i = 0; i < nrOfVertices(); i++){
@@ -459,14 +459,14 @@ inline void Graph<V, E>::printPathFloydWarshall(std::vector<std::vector<std::opt
 }
 
 template<typename V, typename E>
-inline bool Graph<V, E>::checkEdge(size_t u, size_t v, std::vector<bool> &vis){
+inline bool Graph<V, E>::checkEdge(size_t u, size_t v, std::vector<bool> &vis) const{
     if( u == v || (!vis.at(u) && !vis.at(v)) ) return false;
     else if(vis.at(u) && vis.at(v)) return false;
     else return true;
 }
 
 template<typename V, typename E>
-inline void Graph<V, E>::primsMST(){
+inline void Graph<V, E>::primsMST() const{
     std::vector<bool> visited(nrOfVertices(), false);
     size_t counter = 0;
     double min_cost = 0;
@@ -502,14 +502,14 @@ inline void Graph<V, E>::primsMST(){
 }
 
 template<typename V, typename E>
-inline bool Graph<V, E>::isValidForColors(size_t vertex_id, std::vector<size_t> &col, size_t col_checker) {
+inline bool Graph<V, E>::isValidForColors(size_t vertex_id, std::vector<size_t> &col, size_t col_checker) const{
     for(auto i = 0; i < nrOfVertices(); i++) if(neigh_matrix.at(vertex_id).at(i) && col_checker == col.at(i)) return false;
 
     return true;
 }
 
 template<typename V, typename E>
-inline bool Graph<V, E>::tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col){
+inline bool Graph<V, E>::tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col) const{
     if(vertex_id == nrOfVertices()) return true;
     
     for(auto i = 1; i <= nrOfColorsToTry; i++){
@@ -526,7 +526,7 @@ inline bool Graph<V, E>::tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_
 }
 
 template<typename V, typename E>
-inline bool Graph<V, E>::checkColoringResult(size_t nrOfColorsToTry){
+inline bool Graph<V, E>::checkColoringResult(size_t nrOfColorsToTry) const{
     std::vector<size_t> colors(nrOfVertices(), 0);
 
     if(!tryGraphColoring(nrOfColorsToTry, 0, colors)){
@@ -542,14 +542,14 @@ inline bool Graph<V, E>::checkColoringResult(size_t nrOfColorsToTry){
 }
 
 template<typename V, typename E>
-inline void Graph<V, E>::printColors(std::vector<size_t> &col){
+inline void Graph<V, E>::printColors(std::vector<size_t> &col) const{
     std::cout << "Solution for coloring vertices:" << std::endl;
 
     for(auto i = 0; i < nrOfVertices(); i++) std::cout << vertices.at(i) << " color: " << col.at(i) << std::endl;
 }
 
 template<typename V, typename E>
-inline bool Graph<V, E>::checkVerticesDFS_undirected(size_t curr, std::set<size_t> &wSet, std::set<size_t> &gSet, std::set<size_t> &bSet) {
+inline bool Graph<V, E>::checkVerticesDFS_undirected(size_t curr, std::set<size_t> &wSet, std::set<size_t> &gSet, std::set<size_t> &bSet) const{
     wSet.erase(wSet.find(curr));
     gSet.insert(curr);
 
@@ -570,7 +570,7 @@ inline bool Graph<V, E>::checkVerticesDFS_undirected(size_t curr, std::set<size_
 }
 
 template<typename V, typename E>
-inline bool Graph<V, E>::hasCycle_undirected() {
+inline bool Graph<V, E>::hasCycle_undirected() const{
     std::set<size_t> whiteSet, greySey, blackSet;
 
     for(auto i = 0; i < nrOfVertices(); i++) whiteSet.insert(i);
@@ -587,7 +587,7 @@ inline bool Graph<V, E>::hasCycle_undirected() {
 }
 
 template<typename V, typename E>
-inline bool Graph<V, E>::checkVerticesDFS_directed(size_t curr, std::set<size_t> &vis, size_t parent) {
+inline bool Graph<V, E>::checkVerticesDFS_directed(size_t curr, std::set<size_t> &vis, size_t parent) const{
     vis.insert(curr);
 
     for(auto i = 0; i < nrOfVertices(); i++){
@@ -604,7 +604,7 @@ inline bool Graph<V, E>::checkVerticesDFS_directed(size_t curr, std::set<size_t>
 }
 
 template<typename V, typename E>
-inline bool Graph<V, E>::hasCycle_directed() {
+inline bool Graph<V, E>::hasCycle_directed() const{
     std::set<size_t> checker;
 
     for(auto i = 0; i < nrOfVertices(); i++){
@@ -617,7 +617,7 @@ inline bool Graph<V, E>::hasCycle_directed() {
 }
 
 template<typename V, typename E>
-inline bool Graph<V, E>::isSafeVertex(size_t vertex_id, std::vector<ssize_t> &path, size_t pos) {
+inline bool Graph<V, E>::isSafeVertex(size_t vertex_id, std::vector<ssize_t> &path, size_t pos) const{
     if(!neigh_matrix.at(path.at(pos-1)).at(vertex_id)) return false;
 
     for(auto i = 0; i < pos; i++) if(path.at(i) == vertex_id) return false;
@@ -626,7 +626,7 @@ inline bool Graph<V, E>::isSafeVertex(size_t vertex_id, std::vector<ssize_t> &pa
 }
 
 template<typename V, typename E>
-inline bool Graph<V, E>::tryFindingHamCycle(std::vector<ssize_t> &path, size_t pos) {
+inline bool Graph<V, E>::tryFindingHamCycle(std::vector<ssize_t> &path, size_t pos) const{
     if(pos == nrOfVertices()) return (neigh_matrix.at(path.at(pos-1)).at(path.at(0)) ? true : false);
 
     for(auto i = 1; i < nrOfVertices(); i++){
@@ -643,7 +643,7 @@ inline bool Graph<V, E>::tryFindingHamCycle(std::vector<ssize_t> &path, size_t p
 }
 
 template<typename V, typename E>
-inline bool Graph<V, E>::hasHamiltonCycle(size_t startingVertex){
+inline bool Graph<V, E>::hasHamiltonCycle(size_t startingVertex) const{
     std::vector<ssize_t> path(nrOfVertices(), -1);
     path.at(0) = 0;
 
@@ -660,7 +660,7 @@ inline bool Graph<V, E>::hasHamiltonCycle(size_t startingVertex){
 }
 
 template<typename V, typename E>
-inline void Graph<V, E>::printHamiltonCycle(std::vector<ssize_t> &path){
+inline void Graph<V, E>::printHamiltonCycle(std::vector<ssize_t> &path) const{
     std::cout << "Hamilton cycle:" << std::endl;
 
     for(auto i = 0; i < nrOfVertices(); i++) std::cout << path.at(i) << ", ";
@@ -668,8 +668,8 @@ inline void Graph<V, E>::printHamiltonCycle(std::vector<ssize_t> &path){
 }
 
 template<typename V, typename E>
-inline ssize_t Graph<V, E>::getInDegree(size_t vertex_id){
-    if(vertex_id >= nrOfVertices()) return -1;
+inline ssize_t Graph<V, E>::getInDegree(size_t vertex_id) const{
+    if(vertex_id >= nrOfVertices() || vertex_id < 0) return -1;
     else{
         ssize_t degree = 0;
 
@@ -680,20 +680,8 @@ inline ssize_t Graph<V, E>::getInDegree(size_t vertex_id){
 }
 
 template<typename V, typename E>
-inline ssize_t Graph<V, E>::getOutDegree(size_t vertex_id){
-    if(vertex_id >= nrOfVertices()) return -1;
-    else{
-        ssize_t degree = 0;
-
-        for(auto i = 0; i < nrOfVertices(); i++) if(neigh_matrix.at(vertex_id).at(i)) degree++;
-
-        return degree;
-    }
-}
-
-template<typename V, typename E>
-inline ssize_t Graph<V, E>::getDegree(size_t vertex_id){
-    if(vertex_id >= nrOfVertices()) return -1;
+inline ssize_t Graph<V, E>::getOutDegree(size_t vertex_id) const{
+    if(vertex_id >= nrOfVertices() || vertex_id < 0) return -1;
     else{
         ssize_t degree = 0;
 
