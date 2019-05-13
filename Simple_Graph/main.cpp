@@ -44,9 +44,23 @@ int main(){
 
     std::function<void(std::string)> func = [](std::string s){ std::cout << s << ", "; };
     g.dfs(1, func);
+	
+	std::cout << "DFS iterator:" << std::endl;
+	auto v_it = g.beginDFS(1);
+    std::cout << *v_it << ", ";
+	v_it++;
+	std::cout << *v_it << ", ";
+	v_it++;
+	std::cout << *v_it << ", ";
+	v_it++;
+	std::cout << *v_it << ", ";
+
+	std::cout << std::endl;
+	g.dfs(3, func);
     std::cout << std::endl << std::endl;
     g.bfs(1, func);
-
+	g.bfs(3, func);
+	/*
     std::cout << std::endl << std::endl;
     g.dijkstraShortestPath(1);
     std::cout << std::endl << std::endl;
@@ -110,5 +124,5 @@ int main(){
     g4.insertEdge(3, 2, 1);
     g4.insertEdge(3, 0, 1);
     g4.printNeighborhoodMatrix();
-    g4.hasHamiltonCycle(1);
+    g4.hasHamiltonCycle(1);*/
 }

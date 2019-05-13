@@ -70,9 +70,38 @@ private:
         explicit            operator  bool() const { return curr_row != reference.nrOfVertices(); };
     };
 
+	class dfsIterator{
+		protected:
+			size_t current;
+			Graph<V, E> &reference;
+			std::vector<bool> visited;
+			std::stack<size_t> s;
+			size_t count = 0;
+
+			dfsIterator(Graph<V, E> &graph, std::size_t starting_vertex) : reference(graph), current(starting_vertex){ visited.resize(reference.nrOfVertices(), false); };
+			dfsIterator(Graph<V, E> &graph) : reference(graph){ current = reference.nrOfVertices(); count = reference.nrOfVertices(); visited.resize(reference.nrOfVertices(), false); };
+
+		public:
+			friend class Graph;
+
+		    dfsIterator(const dfsIterator &other)                         : reference(other.reference), current(other.current), visited(other.visited), s(other.s), count(other.count){};
+		    dfsIterator(dfsIterator &&other) noexcept                     : reference(other.reference), current(other.current), visited(other.visited), s(other.s), count(other.count){};
+
+		    bool              operator==(const dfsIterator &vi) const { return (current == vi.current && reference == vi.reference); };
+		    bool              operator!=(const dfsIterator &vi) const { return !(*this == vi); };
+		    dfsIterator&      operator++();
+		    dfsIterator const operator++(int);
+		    dfsIterator&      operator+=(size_t count);
+		    dfsIterator&      operator-=(size_t count);
+		    V &               operator* ()     const { return reference.vertices.at(current); };
+		    V *               operator->()     const { return *(reference.vertices.at(current)); };
+		    explicit          operator  bool() const { return count != reference.nrOfVertices(); };
+	};
+
 public:
     friend class VerticesIterator;
     friend class EdgesIterator;
+	friend class dfsIterator;
 
     Graph()                            = default;
     Graph(const Graph&)                = default;
@@ -126,13 +155,16 @@ public:
     inline size_t                         nrOfEdges()                                     const { return no_of_edges; };
     inline VerticesIterator               vertex(std::size_t vertex_id)                         { return VerticesIterator(*this, vertex_id); };
     inline EdgesIterator                  edge(std::size_t vertex1_id, std::size_t vertex2_id)  { return EdgesIterator(*this, vertex1_id, vertex2_id); };
+	inline std::vector<V>                 getConnectedVerticesTo(size_t vertex_id);
 
-    inline VerticesIterator begin()         { return beginVertices(); };
-    inline VerticesIterator end()           { return endVertices(); };
-    inline VerticesIterator beginVertices() { return VerticesIterator(*this, 0); };
-    inline VerticesIterator endVertices()   { return VerticesIterator(*this, vertices.size()); };
-    inline EdgesIterator    beginEdges()    { return EdgesIterator(*this); };
-    inline EdgesIterator    endEdges()      { return EdgesIterator(*this, neigh_matrix.size(), 0); };
+    inline VerticesIterator begin()                          { return beginVertices(); };
+    inline VerticesIterator end()                            { return endVertices(); };
+    inline VerticesIterator beginVertices()                  { return VerticesIterator(*this, 0); };
+    inline VerticesIterator endVertices()                    { return VerticesIterator(*this, vertices.size()); };
+    inline EdgesIterator    beginEdges()                     { return EdgesIterator(*this); };
+    inline EdgesIterator    endEdges()                       { return EdgesIterator(*this, neigh_matrix.size(), 0); };
+	inline dfsIterator      beginDFS(size_t starting_vertex) { return (starting_vertex < vertices.size() ? dfsIterator(*this, starting_vertex) : endDFS()); };
+	inline dfsIterator      endDFS()                         { return dfsIterator(*this); };
 
 private:
     std::vector<V> vertices;
@@ -141,14 +173,14 @@ private:
 };
 
 template<typename V, typename E>
-typename Graph<V, E>::VerticesIterator &Graph<V, E>::VerticesIterator::operator++() {
+typename Graph<V, E>::VerticesIterator &Graph<V, E>::VerticesIterator::operator++(){
     curr_It++;
 
     return *this;
 }
 
 template<typename V, typename E>
-typename Graph<V, E>::VerticesIterator const Graph<V, E>::VerticesIterator::operator++(int) {
+typename Graph<V, E>::VerticesIterator const Graph<V, E>::VerticesIterator::operator++(int){
     auto pom = *this;
     ++curr_It;
 
@@ -156,14 +188,14 @@ typename Graph<V, E>::VerticesIterator const Graph<V, E>::VerticesIterator::oper
 }
 
 template<typename V, typename E>
-typename Graph<V, E>::VerticesIterator &Graph<V, E>::VerticesIterator::operator--() {
+typename Graph<V, E>::VerticesIterator &Graph<V, E>::VerticesIterator::operator--(){
     curr_It--;
 
     return *this;
 }
 
 template<typename V, typename E>
-typename Graph<V, E>::VerticesIterator const Graph<V, E>::VerticesIterator::operator--(int) {
+typename Graph<V, E>::VerticesIterator const Graph<V, E>::VerticesIterator::operator--(int){
     auto pom = *this;
     --curr_It;
 
@@ -171,14 +203,14 @@ typename Graph<V, E>::VerticesIterator const Graph<V, E>::VerticesIterator::oper
 }
 
 template<typename V, typename E>
-typename Graph<V, E>::VerticesIterator &Graph<V, E>::VerticesIterator::operator+=(size_t count) {
+typename Graph<V, E>::VerticesIterator &Graph<V, E>::VerticesIterator::operator+=(size_t count){
     curr_It += count;
 
     return *this;
 }
 
 template<typename V, typename E>
-typename Graph<V, E>::VerticesIterator &Graph<V, E>::VerticesIterator::operator-=(size_t count) {
+typename Graph<V, E>::VerticesIterator &Graph<V, E>::VerticesIterator::operator-=(size_t count){
     curr_It -= count;
 
     return *this;
@@ -226,6 +258,38 @@ typename Graph<V, E>::EdgesIterator const Graph<V, E>::EdgesIterator::operator++
     ++(*this);
 
     return pom;
+}
+
+template<typename V, typename E>
+typename Graph<V, E>::dfsIterator &Graph<V, E>::dfsIterator::operator++(){
+	if(count < reference.nrOfVertices()){
+	    if(!visited.at(current)){
+	        visited.at(current) = true;
+	        count++;
+
+	        for(auto i = reference.neigh_matrix.at(current).size() - 1; i != -1; i--) if(reference.neigh_matrix.at(current).at(i)) s.push(i);
+	    }
+
+	    if(!s.empty()){
+			current = s.top();
+	        s.pop();
+			//return *this;
+		}
+	    /*else{
+	        current = s.top();
+	        s.pop();
+	    }*/
+	}
+	
+	return *this;
+}
+
+template<typename V, typename E>
+typename Graph<V, E>::dfsIterator const Graph<V, E>::dfsIterator::operator++(int){
+    auto pom = *this;
+	++(*this);
+
+    return *this;
 }
 
 template <typename V, typename E>
@@ -323,7 +387,7 @@ inline void Graph<V, E>::dfs(size_t start, std::function<void(const V&)> visitat
 
     std::cout << "DFS algorithm:" << std::endl;
 
-    while(count != nrOfVertices()){
+    while(count < nrOfVertices()){
         if(!visited.at(current)){
             visitator_f(vertices.at(current));
             visited.at(current) = true;
@@ -351,7 +415,7 @@ inline void Graph<V, E>::bfs(size_t start, std::function<void(const V &)> visita
 
     std::cout << "BFS algorithm:" << std::endl;
 
-    while(count != nrOfVertices()){
+    while(count < nrOfVertices()){
         if(!visited.at(current)){
             visitator_f(vertices.at(current));
             visited.at(current) = true;
