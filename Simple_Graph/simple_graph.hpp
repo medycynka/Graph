@@ -59,8 +59,6 @@ private:
         EdgesIterator(const EdgesIterator &s)                                     : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
         EdgesIterator(EdgesIterator &&s) noexcept                                 : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
 
-        std::pair<size_t, size_t> get_row_col(){ return std::make_pair(curr_row, curr_col); };
-
         bool                operator==(const EdgesIterator &ei) const { return (curr_row == ei.curr_row && curr_col == ei.curr_col && reference == ei.reference); };
         bool                operator!=(const EdgesIterator &ei) const { return !(*this == ei); };
         EdgesIterator&      operator++();
@@ -293,9 +291,8 @@ typename Graph<V, E>::dfsIterator &Graph<V, E>::dfsIterator::operator++(){
     if(count < reference.nrOfVertices()){
         for(auto i = reference.neigh_matrix.at(current).size() - 1; i != -1; i--) if(reference.neigh_matrix.at(current).at(i)) s.push(i);
 
-
         if(!s.empty()){
-            while(1){
+            while(true){
                 if(!s.empty() && !visited.at(s.top())){
                     count++;
                     current = s.top();
@@ -340,9 +337,8 @@ typename Graph<V, E>::bfsIterator &Graph<V, E>::bfsIterator::operator++(){
     if(count < reference.nrOfVertices()){
         for(auto i = reference.neigh_matrix.at(current).size() - 1; i != -1; i--) if(reference.neigh_matrix.at(current).at(i)) s.push(i);
 
-
         if(!s.empty()){
-            while(1){
+            while(true){
                 if(!s.empty() && !visited.at(s.front())){
                     count++;
                     current = s.front();
