@@ -163,6 +163,7 @@ public:
     inline bool                           isValidForColors(size_t vertex_id, std::vector<size_t> &col, size_t col_checker) const;
     inline bool                           tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col) const;
     inline bool                           checkColoringResult(size_t nrOfColorsToTry) const;
+    inline std::pair<size_t, bool>        colorUntilDone() const;
     inline void                           printColors(std::vector<size_t> &col) const;
     inline bool                           checkVerticesDFS_directed(size_t curr, std::set<size_t> &vis, size_t parent) const;
     inline bool                           hasCycle_directed() const;
@@ -687,6 +688,17 @@ inline bool Graph<V, E>::checkColoringResult(size_t nrOfColorsToTry) const{
 
         return true;
     }
+}
+
+template<typename V, typename E>
+inline std::pair<size_t, bool>  Graph<V, E>::colorUntilDone() const{
+    std::vector<size_t> colors(nrOfVertices(), 0);
+    auto chromaticNumber = 1;
+
+    while(!tryGraphColoring(chromaticNumber, 0, colors)) chromaticNumber++;
+
+    if(chromaticNumber < nrOfVertices()) return std::make_pair(chromaticNumber, true);
+    else return std::make_pair(chromaticNumber, false);
 }
 
 template<typename V, typename E>
