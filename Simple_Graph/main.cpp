@@ -122,5 +122,55 @@ int main(){
     g4.insertEdge(3, 2, 1);
     g4.insertEdge(3, 0, 1);
     g4.printNeighborhoodMatrix();
-    g4.hasHamiltonCycle(1);*/
+    g4.hasHamiltonCycle(1);
+
+    Graph<int, int> g5;
+    g5.insertVertex(0);
+    g5.insertVertex(1);
+    g5.insertVertex(2);
+    g5.insertVertex(3);
+    g5.insertVertex(4);
+    g5.insertVertex(5);
+    g5.insertVertex(6);
+    g5.insertVertex(7);
+    g5.insertEdge(0, 1, 1);
+    g5.insertEdge(0, 2, 1);
+    g5.insertEdge(0, 5, 1);
+    g5.insertEdge(0, 6, 1);
+    g5.insertEdge(1, 0, 1);
+    g5.insertEdge(1, 2, 1);
+    g5.insertEdge(1, 3, 1);
+    g5.insertEdge(1, 5, 1);
+    g5.insertEdge(1, 6, 1);
+    g5.insertEdge(2, 0, 1);
+    g5.insertEdge(2, 1, 1);
+    g5.insertEdge(2, 4, 1);
+    g5.insertEdge(2, 5, 1);
+    g5.insertEdge(2, 6, 1);
+    g5.insertEdge(2, 7, 1);
+    g5.insertEdge(3, 1, 1);
+    g5.insertEdge(3, 4, 1);
+    g5.insertEdge(3, 6, 1);
+    g5.insertEdge(3, 7, 1);
+    g5.insertEdge(4, 2, 1);
+    g5.insertEdge(4, 3, 1);
+    g5.insertEdge(4, 6, 1);
+    g5.insertEdge(5, 0, 1);
+    g5.insertEdge(5, 1, 1);
+    g5.insertEdge(5, 2, 1);
+    g5.insertEdge(5, 6, 1);
+    g5.insertEdge(5, 7, 1);
+    g5.insertEdge(6, 0, 1);
+    g5.insertEdge(6, 1, 1);
+    g5.insertEdge(6, 2, 1);
+    g5.insertEdge(6, 3, 1);
+    g5.insertEdge(6, 4, 1);
+    g5.insertEdge(6, 5, 1);
+    g5.insertEdge(6, 7, 1);
+    g5.insertEdge(7, 2, 1);
+    g5.insertEdge(7, 3, 1);
+    g5.insertEdge(7, 5, 1);
+    g5.insertEdge(7, 6, 1);
+    g5.printNeighborhoodMatrix();
+    g5.findMaxClique();*/
 }

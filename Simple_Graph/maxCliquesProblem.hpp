@@ -215,7 +215,7 @@ inline void FindMaxClique::expand(Vertices R){
                 level--;
             }
             else if(Q.size() > QMAX.size()){
-                std::cout << "step = " << pk << " current max. clique size = " << Q.size() << std::endl;
+                //std::cout << "step = " << pk << " current max. clique size = " << Q.size() << std::endl;
                 QMAX = Q;
             }
 
