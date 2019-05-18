@@ -12,6 +12,7 @@
 #include <queue>
 #include <set>
 #include <limits>
+#include "maxCliquesProblem.hpp"
 
 const double INF = std::numeric_limits<double>::max();
 
@@ -19,103 +20,103 @@ template <typename V, typename E>
 class Graph{
 private:
     class VerticesIterator{
-    protected:
-        size_t curr_It;
-        Graph<V, E> &reference;
+        protected:
+            size_t curr_It;
+            Graph<V, E> &reference;
 
-        VerticesIterator(Graph<V, E> &graph, std::size_t current_vertex_id) : reference(graph), curr_It(current_vertex_id){};
+            VerticesIterator(Graph<V, E> &graph, std::size_t current_vertex_id) : reference(graph), curr_It(current_vertex_id){};
 
-    public:
-        friend class Graph;
+        public:
+            friend class Graph;
 
-        VerticesIterator(const VerticesIterator &s)                         : reference(s.reference), curr_It(s.curr_It){};
-        VerticesIterator(VerticesIterator &&s) noexcept                     : reference(s.reference), curr_It(s.curr_It){};
+            VerticesIterator(const VerticesIterator &s)                         : reference(s.reference), curr_It(s.curr_It){};
+            VerticesIterator(VerticesIterator &&s) noexcept                     : reference(s.reference), curr_It(s.curr_It){};
 
-        bool                   operator==(const VerticesIterator &vi) const { return (curr_It == vi.curr_It && reference == vi.reference); };
-        bool                   operator!=(const VerticesIterator &vi) const { return !(*this == vi); };
-        VerticesIterator&      operator++();
-        VerticesIterator const operator++(int);
-        VerticesIterator&      operator--();
-        VerticesIterator const operator--(int);
-        VerticesIterator&      operator+=(size_t count);
-        VerticesIterator&      operator-=(size_t count);
-        V &                    operator* ()     const { return reference.vertices.at(curr_It); };
-        V *                    operator->()     const { return *(reference.vertices.at(curr_It)); };
-        explicit               operator  bool() const { return curr_It != reference.nrOfVertices(); };
+            bool                   operator==(const VerticesIterator &vi) const { return (curr_It == vi.curr_It && reference == vi.reference); };
+            bool                   operator!=(const VerticesIterator &vi) const { return !(*this == vi); };
+            VerticesIterator&      operator++();
+            VerticesIterator const operator++(int);
+            VerticesIterator&      operator--();
+            VerticesIterator const operator--(int);
+            VerticesIterator&      operator+=(size_t count);
+            VerticesIterator&      operator-=(size_t count);
+            V &                    operator* ()     const { return reference.vertices.at(curr_It); };
+            V *                    operator->()     const { return *(reference.vertices.at(curr_It)); };
+            explicit               operator  bool() const { return curr_It != reference.nrOfVertices(); };
     };
 
     class EdgesIterator{
-    protected:
-        size_t curr_row;
-        size_t curr_col;
-        Graph<V, E> &reference;
+        protected:
+            size_t curr_row;
+            size_t curr_col;
+            Graph<V, E> &reference;
 
-        explicit EdgesIterator(Graph<V, E> &graph);
-        EdgesIterator(Graph<V, E> &graph, std::size_t nm_row, std::size_t nm_col) : reference(graph), curr_row(nm_row), curr_col(nm_col){};
+            explicit EdgesIterator(Graph<V, E> &graph);
+            EdgesIterator(Graph<V, E> &graph, std::size_t nm_row, std::size_t nm_col) : reference(graph), curr_row(nm_row), curr_col(nm_col){};
 
-    public:
-        friend class Graph;
+        public:
+            friend class Graph;
 
-        EdgesIterator(const EdgesIterator &s)                                     : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
-        EdgesIterator(EdgesIterator &&s) noexcept                                 : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
+            EdgesIterator(const EdgesIterator &s)                                     : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
+            EdgesIterator(EdgesIterator &&s) noexcept                                 : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
 
-        bool                operator==(const EdgesIterator &ei) const { return (curr_row == ei.curr_row && curr_col == ei.curr_col && reference == ei.reference); };
-        bool                operator!=(const EdgesIterator &ei) const { return !(*this == ei); };
-        EdgesIterator&      operator++();
-        EdgesIterator const operator++(int);
-        E&                  operator* () const { return reference.neigh_matrix.at(curr_row).at(curr_col).value(); };
-        E*                  operator->() const { return *(reference.neigh_matrix.at(curr_row).at(curr_col).value()); };
-        explicit            operator  bool() const { return curr_row != reference.nrOfVertices(); };
+            bool                operator==(const EdgesIterator &ei) const { return (curr_row == ei.curr_row && curr_col == ei.curr_col && reference == ei.reference); };
+            bool                operator!=(const EdgesIterator &ei) const { return !(*this == ei); };
+            EdgesIterator&      operator++();
+            EdgesIterator const operator++(int);
+            E&                  operator* () const { return reference.neigh_matrix.at(curr_row).at(curr_col).value(); };
+            E*                  operator->() const { return *(reference.neigh_matrix.at(curr_row).at(curr_col).value()); };
+            explicit            operator  bool() const { return curr_row != reference.nrOfVertices(); };
     };
 
     class dfsIterator{
-    protected:
-        size_t current;
-        Graph<V, E> &reference;
-        std::vector<bool> visited;
-        std::stack<size_t> s;
-        size_t count;
+        protected:
+            size_t current;
+            Graph<V, E> &reference;
+            std::vector<bool> visited;
+            std::stack<size_t> s;
+            size_t count;
 
-        dfsIterator(Graph<V, E> &graph, std::size_t starting_vertex) : reference(graph), current(starting_vertex), count(1){ visited.resize(reference.nrOfVertices(), false); };
+            dfsIterator(Graph<V, E> &graph, std::size_t starting_vertex) : reference(graph), current(starting_vertex), count(1){ visited.resize(reference.nrOfVertices(), false); };
 
-    public:
-        friend class Graph;
+        public:
+            friend class Graph;
 
-        dfsIterator(const dfsIterator &other)                         : reference(other.reference), current(other.current), visited(other.visited), s(other.s), count(other.count){};
-        dfsIterator(dfsIterator &&other) noexcept                     : reference(other.reference), current(other.current), visited(other.visited), s(other.s), count(other.count){};
+            dfsIterator(const dfsIterator &other)                         : reference(other.reference), current(other.current), visited(other.visited), s(other.s), count(other.count){};
+            dfsIterator(dfsIterator &&other) noexcept                     : reference(other.reference), current(other.current), visited(other.visited), s(other.s), count(other.count){};
 
-        bool              operator==(const dfsIterator &vi) const { return (current == vi.current && reference == vi.reference); };
-        bool              operator!=(const dfsIterator &vi) const { return !(*this == vi); };
-        dfsIterator&      operator++();
-        dfsIterator const operator++(int);
-        V &               operator* ()     const { return reference.vertices.at(current); };
-        V *               operator->()     const { return *(reference.vertices.at(current)); };
-        explicit          operator  bool() const { return count != reference.nrOfVertices(); };
+            bool              operator==(const dfsIterator &vi) const { return (current == vi.current && reference == vi.reference); };
+            bool              operator!=(const dfsIterator &vi) const { return !(*this == vi); };
+            dfsIterator&      operator++();
+            dfsIterator const operator++(int);
+            V &               operator* ()     const { return reference.vertices.at(current); };
+            V *               operator->()     const { return *(reference.vertices.at(current)); };
+            explicit          operator  bool() const { return count != reference.nrOfVertices(); };
     };
 
     class bfsIterator{
-    protected:
-        size_t current;
-        Graph<V, E> &reference;
-        std::vector<bool> visited;
-        std::queue<size_t> s;
-        size_t count;
+        protected:
+            size_t current;
+            Graph<V, E> &reference;
+            std::vector<bool> visited;
+            std::queue<size_t> s;
+            size_t count;
 
-        bfsIterator(Graph<V, E> &graph, std::size_t starting_vertex) : reference(graph), current(starting_vertex), count(1){ visited.resize(reference.nrOfVertices(), false); };
+            bfsIterator(Graph<V, E> &graph, std::size_t starting_vertex) : reference(graph), current(starting_vertex), count(1){ visited.resize(reference.nrOfVertices(), false); };
 
-    public:
-        friend class Graph;
+        public:
+            friend class Graph;
 
-        bfsIterator(const bfsIterator &other)                         : reference(other.reference), current(other.current), visited(other.visited), s(other.s), count(other.count){};
-        bfsIterator(bfsIterator &&other) noexcept                     : reference(other.reference), current(other.current), visited(other.visited), s(other.s), count(other.count){};
+            bfsIterator(const bfsIterator &other)                         : reference(other.reference), current(other.current), visited(other.visited), s(other.s), count(other.count){};
+            bfsIterator(bfsIterator &&other) noexcept                     : reference(other.reference), current(other.current), visited(other.visited), s(other.s), count(other.count){};
 
-        bool              operator==(const bfsIterator &vi) const { return (current == vi.current && reference == vi.reference); };
-        bool              operator!=(const bfsIterator &vi) const { return !(*this == vi); };
-        bfsIterator&      operator++();
-        bfsIterator const operator++(int);
-        V &               operator* ()     const { return reference.vertices.at(current); };
-        V *               operator->()     const { return *(reference.vertices.at(current)); };
-        explicit          operator  bool() const { return count != reference.nrOfVertices(); };
+            bool              operator==(const bfsIterator &vi) const { return (current == vi.current && reference == vi.reference); };
+            bool              operator!=(const bfsIterator &vi) const { return !(*this == vi); };
+            bfsIterator&      operator++();
+            bfsIterator const operator++(int);
+            V &               operator* ()     const { return reference.vertices.at(current); };
+            V *               operator->()     const { return *(reference.vertices.at(current)); };
+            explicit          operator  bool() const { return count != reference.nrOfVertices(); };
     };
 
 public:
@@ -144,7 +145,7 @@ public:
     inline void                           dfs(size_t start, std::function<void(const V&)> visitator_f);
     inline void                           bfs(size_t start, std::function<void(const V&)> visitator_f);
 
-    /** Graph's alghorithms */
+    /** Graph's algorithms */
     inline size_t                         getMinVertex(std::vector<bool> &vis, std::vector<double> &keys) const;
     inline void                           dijkstraShortestPath(size_t source) const;
     inline void                           printPathDijkstra(size_t source, std::vector<double> &keys) const;
@@ -171,6 +172,7 @@ public:
     inline bool                           tryFindingHamCycle(std::vector<ssize_t> &path, size_t pos) const;
     inline bool                           hasHamiltonCycle(size_t startingVertex) const;
     inline void                           printHamiltonCycle(std::vector<ssize_t> &path) const;
+    inline void                           findMaxClique();
     inline ssize_t                        getDegree(size_t vertex_id)                     const { return getOutDegree(vertex_id); };
     inline std::vector<V>                 getConnectedVerticesTo(size_t vertex_id)              { return getOutConnectedVerticesTo(vertex_id); };
 
@@ -871,6 +873,36 @@ inline std::vector<V> Graph<V, E>::getInConnectedVerticesTo(size_t vertex_id){
     }
 
     return result;
+}
+
+template <typename V, typename E>
+inline void Graph<V, E>::findMaxClique(){
+    bool **tempMatrix;
+    tempMatrix = new bool*[nrOfVertices()];
+
+    for(auto i = 0; i < nrOfVertices(); i++){
+        tempMatrix[i] = new bool[nrOfVertices()];
+
+        for(auto j = 0; j < nrOfVertices(); j++){
+            if(neigh_matrix.at(i).at(j)) tempMatrix[i][j] = true;
+            else tempMatrix[i][j] = false;
+        }
+    }
+
+    FindMaxClique mc(tempMatrix, nrOfVertices(), 0.025);
+    ssize_t *maxClique;
+    ssize_t mcSize;
+    mc.maxCliqueAlgorithm(maxClique, mcSize);
+
+    std::cout << "Maximum clique: ";
+    for(auto i = 0; i < mcSize; i++) std::cout << maxClique[i] << " ";
+    std::cout << std::endl;
+    std::cout << "Size = " << mcSize << std::endl;
+    std::cout << "Number of steps = " << mc.steps() << std::endl;
+
+    for(auto i = 0; i < nrOfVertices(); i++) delete [] tempMatrix[i];
+    delete [] tempMatrix;
+    delete [] maxClique;
 }
 
 #endif //SIMPLE_GRAPH_SIMPLE_GRAPH_HPP
