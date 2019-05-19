@@ -172,5 +172,6 @@ int main(){
     g5.insertEdge(7, 5, 1);
     g5.insertEdge(7, 6, 1);
     g5.printNeighborhoodMatrix();
+    std::cout << std::endl;
     g5.findMaxClique();*/
 }
