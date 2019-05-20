@@ -151,7 +151,7 @@ public:
     inline size_t                                 getMinVertex(std::vector<bool> &vis, std::vector<double> &keys) const;
     inline void                                   dijkstraShortestPath(size_t source) const;
     inline void                                   printPathDijkstra(size_t source, std::vector<double> &keys) const;
-    inline std::pair<double, std::vector<size_t>> dijkstra(size_t start, size_t end, std::function<double(const E&)> visitator_f) const;
+    inline std::pair<double, std::vector<size_t>> dijkstra(size_t start, size_t end, std::function<double(const E&)> visitator_f = [](const double &e) -> double { return e; }) const;
     inline void                                   computeFloydWarshall() const;
     inline void                                   printPathFloydWarshall(std::vector<std::vector<std::optional<E>>> &input) const;
     inline bool                                   checkEdge(size_t u, size_t v, std::vector<bool> &vis) const;
@@ -629,17 +629,18 @@ template<typename V, typename E>
 inline void Graph<V, E>::computeFloydWarshall() const{
     std::vector<std::vector<std::optional<E>>> temp = neigh_matrix;
     double w = INF;
+    auto size_ = nrOfVertices();
 
-    for(auto k = 0; k < nrOfVertices(); k++){
+    for(auto k = 0; k < size_; k++){
         temp.at(k).at(k) = 0;
 
-        for(auto i = 0; i < nrOfVertices(); i++){
-            for(auto j = 0; j < nrOfVertices(); j++){
+        for(auto i = 0; i < size_; i++){
+            for(auto j = 0; j < size_; j++){
                 if(temp.at(i).at(k).value_or(INF) != INF || temp.at(k).at(j).value_or(INF) != INF){
                     w = temp.at(i).at(k).value_or(INF) + temp.at(k).at(j).value_or(INF);
                 }
 
-                if(temp.at(i).at(j).value_or(INF) != INF && temp.at(i).at(j).value_or(INF) > w) temp[i][j] = w;
+                if(temp.at(i).at(j).value_or(INF) != INF && temp.at(i).at(j).value_or(INF) > w) temp.at(i).at(j) = w;
             }
         }
     }
@@ -650,9 +651,10 @@ inline void Graph<V, E>::computeFloydWarshall() const{
 template<typename V, typename E>
 inline void Graph<V, E>::printPathFloydWarshall(std::vector<std::vector<std::optional<E>>> &input) const{
     std::cout << "Shortest paths:" << std::endl;
+    auto size_ = nrOfVertices();
 
-    for(auto i = 0; i < nrOfVertices(); i++){
-        for(auto j = 0; j < nrOfVertices(); j++){
+    for(auto i = 0; i < size_; i++){
+        for(auto j = 0; j < size_; j++){
             std::cout << "From " << vertices.at(i) << " to " << vertices.at(j) << " = ";
 
             if(input.at(i).at(j).value_or(INF) == INF) std::cout << "NO PATH";
@@ -666,8 +668,7 @@ inline void Graph<V, E>::printPathFloydWarshall(std::vector<std::vector<std::opt
 template<typename V, typename E>
 inline bool Graph<V, E>::checkEdge(size_t u, size_t v, std::vector<bool> &vis) const{
     if( u == v || (!vis.at(u) && !vis.at(v)) ) return false;
-    else if(vis.at(u) && vis.at(v)) return false;
-    else return true;
+    else return !(vis.at(u) && vis.at(v));
 }
 
 template<typename V, typename E>
@@ -675,16 +676,17 @@ inline void Graph<V, E>::primsMST() const{
     std::vector<bool> visited(nrOfVertices(), false);
     size_t counter = 0;
     double min_cost = 0;
+    auto size_ = nrOfVertices();
 
     visited.at(0) = true;
 
-    while(counter < nrOfVertices()-1){
+    while(counter < size_-1){
         auto min = INF;
         auto a = -1;
         auto b = -1;
 
-        for(auto i = 0; i < nrOfVertices(); i++){
-            for(auto j = 0; j < nrOfVertices(); j++){
+        for(auto i = 0; i < size_; i++){
+            for(auto j = 0; j < size_; j++){
                 if(neigh_matrix.at(i).at(j).value_or(INF) < min){
                     if(checkEdge(i, j, visited)){
                         min = neigh_matrix.at(i).at(j).value_or(INF);
@@ -715,9 +717,11 @@ inline bool Graph<V, E>::isValidForColors(size_t vertex_id, std::vector<size_t> 
 
 template<typename V, typename E>
 inline bool Graph<V, E>::tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col) const{
-    if(vertex_id == nrOfVertices()) return true;
+    auto size_ = nrOfVertices();
 
-    for(auto i = 1; i <= nrOfColorsToTry; i++){
+    if(vertex_id == size_) return true;
+
+    for(auto i = 1; i <= size_; i++){
         if(isValidForColors(vertex_id, col, i)){
             col.at(vertex_id) = i;
 
@@ -748,21 +752,15 @@ inline bool Graph<V, E>::checkColoringResult(size_t nrOfColorsToTry) const{
 
 template<typename V, typename E>
 inline std::pair<size_t, bool>  Graph<V, E>::colorUntilDone() const{
-    std::vector<size_t> colors(nrOfVertices(), 0);
+    auto size_ = nrOfVertices();
+    std::vector<size_t> colors(size_, 0);
     auto chromaticNumber = 1;
 
     while(!tryGraphColoring(chromaticNumber, 0, colors)) chromaticNumber++;
 
-    if(chromaticNumber < nrOfVertices()){
-        printColors(colors);
+    printColors(colors);
 
-        return std::make_pair(chromaticNumber, true);
-    }
-    else{
-        printColors(colors);
-
-        return std::make_pair(chromaticNumber, false);
-    }
+    return std::make_pair(chromaticNumber, (chromaticNumber < size_));
 }
 
 template<typename V, typename E>
@@ -796,11 +794,12 @@ inline bool Graph<V, E>::checkVerticesDFS_undirected(size_t curr, std::set<size_
 template<typename V, typename E>
 inline bool Graph<V, E>::hasCycle_undirected() const{
     std::set<size_t> whiteSet, greySey, blackSet;
+    auto size_ = nrOfVertices();
 
-    for(auto i = 0; i < nrOfVertices(); i++) whiteSet.insert(i);
+    for(auto i = 0; i < size_; i++) whiteSet.insert(i);
 
     while(!whiteSet.empty()){
-        for(auto i = 0; i < nrOfVertices(); i++){
+        for(auto i = 0; i < size_; i++){
             if(whiteSet.find(i) != whiteSet.end()){
                 if(checkVerticesDFS_undirected(i, whiteSet, greySey, blackSet)) return true;
             }
@@ -941,11 +940,12 @@ template <typename V, typename E>
 inline void Graph<V, E>::findMaxClique(){
     bool **tempMatrix;
     tempMatrix = new bool*[nrOfVertices()];
+    auto size_ = nrOfVertices();
 
-    for(auto i = 0; i < nrOfVertices(); i++){
+    for(auto i = 0; i < size_; i++){
         tempMatrix[i] = new bool[nrOfVertices()];
 
-        for(auto j = 0; j < nrOfVertices(); j++){
+        for(auto j = 0; j < size_; j++){
             if(neigh_matrix.at(i).at(j)) tempMatrix[i][j] = true;
             else tempMatrix[i][j] = false;
         }

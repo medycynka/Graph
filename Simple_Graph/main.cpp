@@ -73,10 +73,7 @@ int main(){
         std::cout << *dfs_it << ", ";
     }
     std::cout << std::endl << std::endl;
-    g.dijkstraShortestPath(2);
-    g.dijkstraShortestPath(1);
-    g.dijkstraShortestPath(3);
-    std::cout << std::endl << std::endl;
+
     auto [shortest_path_distance, shortest_path] = g.dijkstra(2u, 4u, [](const double &e) -> double { return e; });
     std::cout << "Distance from 2 to 4: " << shortest_path_distance << std::endl;
     std::cout << "Path from 2 to 4:" << std::endl;
@@ -121,13 +118,14 @@ int main(){
         std::cout << v_id << ", ";
     }
     std::cout << std::endl;
-    /*
-    std::cout << std::endl << std::endl;
+
+    /*std::cout << std::endl << std::endl;
     g.computeFloydWarshall();
     std::cout << std::endl << std::endl;
     g.primsMST();
     std::cout << std::endl << (g.hasCycle_undirected() ? "Graph g has cycle" : "Graph g doesn't have cycles") << std::endl;
     std::cout << "Vertex " << *g.vertex(0) << " has " << g.getInDegree(0) << " \"in-vertex\" and " << g.getOutDegree(0) << " \"out-vertices\"" << std::endl << std::endl;
+
     Graph<int, int> g2;
     g2.insertVertex(0);
     g2.insertVertex(1);
@@ -147,11 +145,13 @@ int main(){
     g2.checkColoringResult(1);
     g2.checkColoringResult(2);
     g2.checkColoringResult(3);
+    g2.colorUntilDone();
     std::cout << std::endl << (g2.hasCycle_directed() ? "Graph g2 has cycle" : "Graph g2 doesn't have cycles") << std::endl;
     g2.hasHamiltonCycle(1);
     std::cout << "Vertex " << *g2.vertex(0) << " has degree = " << g2.getDegree(0) << std::endl << std::endl;
     g2.findMaxClique();
     std::cout << std::endl;
+
     Graph<int, int> g3;
     g3.insertVertex(0);
     g3.insertVertex(1);
@@ -161,6 +161,7 @@ int main(){
     g3.insertEdge(2, 1, 1);
     g3.printNeighborhoodMatrix();
     std::cout << std::endl << (g3.hasCycle_undirected() ? "Graph g3 has cycle" : "Graph g3 doesn't have cycles") << std::endl << std::endl;
+
     Graph<int, int> g4;
     g4.insertVertex(0);
     g4.insertVertex(1);
@@ -176,6 +177,7 @@ int main(){
     g4.insertEdge(3, 0, 1);
     g4.printNeighborhoodMatrix();
     g4.hasHamiltonCycle(1);
+
     Graph<int, int> g5;
     g5.insertVertex(0);
     g5.insertVertex(1);
