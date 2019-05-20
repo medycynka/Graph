@@ -12,6 +12,7 @@
 #include <queue>
 #include <set>
 #include <limits>
+#include <unordered_map>
 #include "maxCliquesProblem.hpp"
 
 const double INF = std::numeric_limits<double>::max();
@@ -577,11 +578,50 @@ inline void Graph<V, E>::printPathDijkstra(size_t source, std::vector<double> &k
 template<typename V, typename E>
 inline std::pair<double, std::vector<size_t>> Graph<V, E>::dijkstra(size_t start, size_t end, std::function<double(const E&)> visitator_f) const{
 	auto size_ = nrOfVertices();
-	std::vector<bool> visited(size_, false);
-	std::vector<double> distance(size_, INF);
+	std::unordered_map<size_t, double> distances;   // vertex - distance
+	std::unordered_map<size_t, size_t> previous;
+	std::vector<size_t> nodes;
 	std::vector<size_t> path;
+	auto comparator = [&](size_t lhs, size_t rhs){ return (distances[lhs] > distances[rhs]); };
 
-	return std::make_pair(0, path);
+	for(auto i = 0; i < size_; i++){
+        if(i == start) distances[i] = 0;
+        else distances[i] = INF;
+
+        nodes.push_back(i);
+        std::push_heap(nodes.begin(), nodes.end(), comparator);
+	}
+
+	while(!nodes.empty()){
+        std::pop_heap(nodes.begin(), nodes.end(), comparator);
+        auto smallest = nodes.back();
+        nodes.pop_back();
+
+        if(smallest == end){
+            while(previous.find(smallest) != previous.end()){
+                path.push_back(smallest);
+                smallest = previous[smallest];
+            }
+
+            break;
+        }
+
+        if(distances[smallest] == INF) break;
+
+        for(auto i = 0; i < size_; i++){
+            auto alt = distances[smallest] + neigh_matrix.at(smallest).at(i).value_or(INF);
+
+            if(alt < distances[i]){
+                distances[i] = alt;
+                previous[i] = smallest;
+                std::make_heap(nodes.begin(), nodes.end(), comparator);
+            }
+        }
+	}
+
+	std::reverse(path.begin(), path.end());
+
+	return std::make_pair(distances[end], path);
 }
 
 template<typename V, typename E>
@@ -714,12 +754,12 @@ inline std::pair<size_t, bool>  Graph<V, E>::colorUntilDone() const{
 
     if(chromaticNumber < nrOfVertices()){
 		printColors(colors);
-		
+
 		return std::make_pair(chromaticNumber, true);
 	}
     else{
 		printColors(colors);
-				
+
 		return std::make_pair(chromaticNumber, false);
 	}
 }

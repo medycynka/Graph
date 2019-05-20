@@ -77,7 +77,7 @@ int main(){
 	g.dijkstraShortestPath(1);
 	g.dijkstraShortestPath(3);
 	std::cout << std::endl << std::endl;
-	/*auto [shortest_path_distance, shortest_path] = g.dijkstra(2u, 4u, [](const double &e) -> double { return e; });
+	auto [shortest_path_distance, shortest_path] = g.dijkstra(2u, 4u, [](const double &e) -> double { return e; });
 	std::cout << "Distance from 2 to 4: " << shortest_path_distance << std::endl;
 	std::cout << "Path from 2 to 4:" << std::endl;
 	for(auto &v_id : shortest_path)
@@ -112,7 +112,7 @@ int main(){
 	std::cout << v_id << ", ";
 	}
 	std::cout << std::endl;
-
+    /*
     std::cout << std::endl << std::endl;
     g.computeFloydWarshall();
     std::cout << std::endl << std::endl;
