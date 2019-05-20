@@ -619,6 +619,7 @@ inline std::pair<double, std::vector<size_t>> Graph<V, E>::dijkstra(size_t start
         }
 	}
 
+	path.push_back(start);
 	std::reverse(path.begin(), path.end());
 
 	return std::make_pair(distances[end], path);
