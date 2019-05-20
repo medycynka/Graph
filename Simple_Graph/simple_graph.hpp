@@ -32,7 +32,7 @@ private:
             VerticesIterator(const VerticesIterator &s)                         : reference(s.reference), curr_It(s.curr_It){};
             VerticesIterator(VerticesIterator &&s) noexcept                     : reference(s.reference), curr_It(s.curr_It){};
 
-            bool                   operator==(const VerticesIterator &vi) const { return (curr_It == vi.curr_It && reference == vi.reference); };
+			bool                   operator==(const VerticesIterator &vi) const { return (curr_It == vi.curr_It && reference == vi.reference); };
             bool                   operator!=(const VerticesIterator &vi) const { return !(*this == vi); };
             VerticesIterator&      operator++();
             VerticesIterator const operator++(int);
@@ -123,6 +123,7 @@ public:
     friend class VerticesIterator;
     friend class EdgesIterator;
     friend class dfsIterator;
+	friend class bfsIterator;
 
     Graph()                            = default;
     Graph(const Graph&)                = default;
@@ -137,50 +138,51 @@ public:
     bool operator==(const Graph &other) { return (no_of_edges == other.no_of_edges && vertices == other.vertices && neigh_matrix == other.neigh_matrix); };
     bool operator!=(const Graph &other) { return !(*this == other); };
 
-    inline VerticesIterator               insertVertex(const V& vertex_data);
-    inline std::pair<EdgesIterator, bool> insertEdge(size_t vertex1_id, size_t vertex2_id, const E &label = E(), bool replace = true);
-    inline bool                           removeVertex(size_t vertex_id);
-    inline bool                           removeEdge(size_t vertex1_id, size_t vertex2_id);
-    inline void                           printNeighborhoodMatrix() const;
-    inline void                           dfs(size_t start, std::function<void(const V&)> visitator_f);
-    inline void                           bfs(size_t start, std::function<void(const V&)> visitator_f);
+    inline VerticesIterator                       insertVertex(const V& vertex_data);
+    inline std::pair<EdgesIterator, bool>         insertEdge(size_t vertex1_id, size_t vertex2_id, const E &label = E(), bool replace = true);
+    inline bool                                   removeVertex(size_t vertex_id);
+    inline bool                                   removeEdge(size_t vertex1_id, size_t vertex2_id);
+    inline void                                   printNeighborhoodMatrix() const;
+    inline void                                   dfs(size_t start, std::function<void(const V&)> visitator_f);
+    inline void                                   bfs(size_t start, std::function<void(const V&)> visitator_f);
 
     /** Graph's algorithms */
-    inline size_t                         getMinVertex(std::vector<bool> &vis, std::vector<double> &keys) const;
-    inline void                           dijkstraShortestPath(size_t source) const;
-    inline void                           printPathDijkstra(size_t source, std::vector<double> &keys) const;
-    inline void                           computeFloydWarshall() const;
-    inline void                           printPathFloydWarshall(std::vector<std::vector<std::optional<E>>> &input) const;
-    inline bool                           checkEdge(size_t u, size_t v, std::vector<bool> &vis) const;
-    inline void                           primsMST() const;
+    inline size_t                                 getMinVertex(std::vector<bool> &vis, std::vector<double> &keys) const;
+    inline void                                   dijkstraShortestPath(size_t source) const;
+    inline void                                   printPathDijkstra(size_t source, std::vector<double> &keys) const;
+	inline std::pair<double, std::vector<size_t>> dijkstra(size_t start, size_t end, std::function<double(const E&)> visitator_f) const;
+    inline void                                   computeFloydWarshall() const;
+    inline void                                   printPathFloydWarshall(std::vector<std::vector<std::optional<E>>> &input) const;
+    inline bool                                   checkEdge(size_t u, size_t v, std::vector<bool> &vis) const;
+    inline void                                   primsMST() const;
     /** Only for directed graphs */
-    inline bool                           checkVerticesDFS_undirected(size_t curr, std::set<size_t> &wSet, std::set<size_t> &gSet, std::set<size_t> &bSet) const;
-    inline bool                           hasCycle_undirected() const;
-    inline ssize_t                        getInDegree(size_t vertex_id) const;
-    inline ssize_t                        getOutDegree(size_t vertex_id) const;
-    inline std::vector<V>                 getOutConnectedVerticesTo(size_t vertex_id);
-    inline std::vector<V>                 getInConnectedVerticesTo(size_t vertex_id);
+    inline bool                                   checkVerticesDFS_undirected(size_t curr, std::set<size_t> &wSet, std::set<size_t> &gSet, std::set<size_t> &bSet) const;
+    inline bool                                   hasCycle_undirected() const;
+    inline ssize_t                                getInDegree(size_t vertex_id) const;
+    inline ssize_t                                getOutDegree(size_t vertex_id) const;
+    inline std::vector<V>                         getOutConnectedVerticesTo(size_t vertex_id);
+    inline std::vector<V>                         getInConnectedVerticesTo(size_t vertex_id);
     /** Only for undirected graphs */
-    inline bool                           isValidForColors(size_t vertex_id, std::vector<size_t> &col, size_t col_checker) const;
-    inline bool                           tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col) const;
-    inline bool                           checkColoringResult(size_t nrOfColorsToTry) const;
-    inline std::pair<size_t, bool>        colorUntilDone() const;
-    inline void                           printColors(std::vector<size_t> &col) const;
-    inline bool                           checkVerticesDFS_directed(size_t curr, std::set<size_t> &vis, size_t parent) const;
-    inline bool                           hasCycle_directed() const;
-    inline bool                           isSafeVertex(size_t vertex_id, std::vector<ssize_t> &path, size_t pos) const;
-    inline bool                           tryFindingHamCycle(std::vector<ssize_t> &path, size_t pos) const;
-    inline bool                           hasHamiltonCycle(size_t startingVertex) const;
-    inline void                           printHamiltonCycle(std::vector<ssize_t> &path) const;
-    inline void                           findMaxClique();
-    inline ssize_t                        getDegree(size_t vertex_id)                     const { return getOutDegree(vertex_id); };
-    inline std::vector<V>                 getConnectedVerticesTo(size_t vertex_id)              { return getOutConnectedVerticesTo(vertex_id); };
+    inline bool                                   isValidForColors(size_t vertex_id, std::vector<size_t> &col, size_t col_checker) const;
+    inline bool                                   tryGraphColoring(size_t nrOfColorsToTry, size_t vertex_id, std::vector<size_t> &col) const;
+    inline bool                                   checkColoringResult(size_t nrOfColorsToTry) const;
+    inline std::pair<size_t, bool>                colorUntilDone() const;
+    inline void                                   printColors(std::vector<size_t> &col) const;
+    inline bool                                   checkVerticesDFS_directed(size_t curr, std::set<size_t> &vis, size_t parent) const;
+    inline bool                                   hasCycle_directed() const;
+    inline bool                                   isSafeVertex(size_t vertex_id, std::vector<ssize_t> &path, size_t pos) const;
+    inline bool                                   tryFindingHamCycle(std::vector<ssize_t> &path, size_t pos) const;
+    inline bool                                   hasHamiltonCycle(size_t startingVertex) const;
+    inline void                                   printHamiltonCycle(std::vector<ssize_t> &path) const;
+    inline void                                   findMaxClique();
+    inline ssize_t                                getDegree(size_t vertex_id)                     const { return getOutDegree(vertex_id); };
+    inline std::vector<V>                         getConnectedVerticesTo(size_t vertex_id)              { return getOutConnectedVerticesTo(vertex_id); };
 
-    inline bool                           edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
-    inline size_t                         nrOfVertices()                                  const { return vertices.size(); };
-    inline size_t                         nrOfEdges()                                     const { return no_of_edges; };
-    inline VerticesIterator               vertex(std::size_t vertex_id)                         { return VerticesIterator(*this, vertex_id); };
-    inline EdgesIterator                  edge(std::size_t vertex1_id, std::size_t vertex2_id)  { return EdgesIterator(*this, vertex1_id, vertex2_id); };
+    inline bool                                  edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
+    inline size_t                                nrOfVertices()                                  const { return vertices.size(); };
+    inline size_t                                nrOfEdges()                                     const { return no_of_edges; };
+    inline VerticesIterator                      vertex(std::size_t vertex_id)                         { return VerticesIterator(*this, vertex_id); };
+    inline EdgesIterator                         edge(std::size_t vertex1_id, std::size_t vertex2_id)  { return EdgesIterator(*this, vertex1_id, vertex2_id); };
 
     inline VerticesIterator begin()                          { return beginVertices(); };
     inline VerticesIterator end()                            { return endVertices(); };
@@ -338,7 +340,7 @@ typename Graph<V, E>::bfsIterator &Graph<V, E>::bfsIterator::operator++(){
     visited.at(current) = true;
 
     if(count < reference.nrOfVertices()){
-        for(auto i = reference.neigh_matrix.at(current).size() - 1; i != -1; i--) if(reference.neigh_matrix.at(current).at(i)) s.push(i);
+        for(auto i = 0; i < reference.neigh_matrix.at(current).size(); i++) if(reference.neigh_matrix.at(current).at(i)) s.push(i);
 
         if(!s.empty()){
             while(true){
@@ -508,7 +510,7 @@ inline void Graph<V, E>::bfs(size_t start, std::function<void(const V &)> visita
             visited.at(current) = true;
             count++;
 
-            for(size_t i = neigh_matrix.at(current).size() - 1; i != -1; i--) if(neigh_matrix.at(current).at(i)) s.push(i);
+            for(size_t i = 0; i < neigh_matrix.at(current).size(); i++) if(neigh_matrix.at(current).at(i)) s.push(i);
         }
 
         if(s.empty()) break;
@@ -538,18 +540,19 @@ inline size_t Graph<V, E>::getMinVertex(std::vector<bool> &vis, std::vector<doub
 
 template<typename V, typename E>
 inline void Graph<V, E>::dijkstraShortestPath(size_t source) const{
-    std::vector<bool> visited(nrOfVertices(), false);
-    std::vector<double> distance(nrOfVertices(), INF);
+	auto size_ = nrOfVertices();
+    std::vector<bool> visited(size_, false);
+    std::vector<double> distance(size_, INF);
     size_t temp1;
     double temp2;
 
     distance.at(source) = 0;
 
-    for(auto i = 0; i < nrOfVertices()-1; i++){
+    for(auto i = 0; i < size_-1; i++){
         temp1 = getMinVertex(visited, distance);
         visited.at(temp1) = true;
 
-        for(auto j = 0; j < nrOfVertices(); j++){
+        for(auto j = 0; j < size_; j++){
             if(neigh_matrix.at(temp1).at(j).value_or(INF) > 0){
                 if(!visited.at(j) && neigh_matrix.at(temp1).at(j).value_or(INF) != INF){
                     temp2 = neigh_matrix.at(temp1).at(j).value() + distance.at(temp1);
@@ -569,6 +572,16 @@ inline void Graph<V, E>::printPathDijkstra(size_t source, std::vector<double> &k
         if(keys.at(i) != INF) std::cout << "From vertex " << vertices.at(source) << " to " << vertices.at(i) << " distance = " << keys.at(i) << std::endl;
         else std::cout << "From vertex " << vertices.at(source) << " couldn't reach vertex " << vertices.at(i) << " (no connection)" << std::endl;
     }
+}
+
+template<typename V, typename E>
+inline std::pair<double, std::vector<size_t>> Graph<V, E>::dijkstra(size_t start, size_t end, std::function<double(const E&)> visitator_f) const{
+	auto size_ = nrOfVertices();
+	std::vector<bool> visited(size_, false);
+	std::vector<double> distance(size_, INF);
+	std::vector<size_t> path;
+
+	return std::make_pair(0, path);
 }
 
 template<typename V, typename E>
@@ -699,8 +712,16 @@ inline std::pair<size_t, bool>  Graph<V, E>::colorUntilDone() const{
 
     while(!tryGraphColoring(chromaticNumber, 0, colors)) chromaticNumber++;
 
-    if(chromaticNumber < nrOfVertices()) return std::make_pair(chromaticNumber, true);
-    else return std::make_pair(chromaticNumber, false);
+    if(chromaticNumber < nrOfVertices()){
+		printColors(colors);
+		
+		return std::make_pair(chromaticNumber, true);
+	}
+    else{
+		printColors(colors);
+				
+		return std::make_pair(chromaticNumber, false);
+	}
 }
 
 template<typename V, typename E>
