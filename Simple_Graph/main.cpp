@@ -126,7 +126,7 @@ int main(){
     std::cout << std::endl << (g.hasCycle_undirected() ? "Graph g has cycle" : "Graph g doesn't have cycles") << std::endl;
     std::cout << "Vertex " << *g.vertex(0) << " has " << g.getInDegree(0) << " \"in-vertex\" and " << g.getOutDegree(0) << " \"out-vertices\"" << std::endl << std::endl;
 
-    Graph<int, int> g2;
+    Graph<size_t, size_t> g2;
     g2.insertVertex(0);
     g2.insertVertex(1);
     g2.insertVertex(2);
@@ -152,7 +152,7 @@ int main(){
     g2.findMaxClique();
     std::cout << std::endl;
 
-    Graph<int, int> g3;
+    Graph<size_t, size_t> g3;
     g3.insertVertex(0);
     g3.insertVertex(1);
     g3.insertVertex(2);
@@ -162,7 +162,7 @@ int main(){
     g3.printNeighborhoodMatrix();
     std::cout << std::endl << (g3.hasCycle_undirected() ? "Graph g3 has cycle" : "Graph g3 doesn't have cycles") << std::endl << std::endl;
 
-    Graph<int, int> g4;
+    Graph<size_t, size_t> g4;
     g4.insertVertex(0);
     g4.insertVertex(1);
     g4.insertVertex(2);
@@ -177,8 +177,9 @@ int main(){
     g4.insertEdge(3, 0, 1);
     g4.printNeighborhoodMatrix();
     g4.hasHamiltonCycle(1);
+    std::cout << std::endl;
 
-    Graph<int, int> g5;
+    Graph<size_t, size_t> g5;
     g5.insertVertex(0);
     g5.insertVertex(1);
     g5.insertVertex(2);
@@ -227,5 +228,6 @@ int main(){
     g5.insertEdge(7, 6, 1);
     g5.printNeighborhoodMatrix();
     std::cout << std::endl;
-    g5.findMaxClique();*/
+    g5.findMaxClique();
+    std::cout << std::endl;*/
 }

@@ -2,65 +2,64 @@
 #define SIMPLE_GRAPH_MAXCLIQUESPROBLEM_HPP
 
 #pragma once
-#include <iostream>
 #include <algorithm>
 #include <cassert>
-#include <optional>
-#include <algorithm>
-#include <limits>
 
+template <typename T = bool>
 class FindMaxClique{
         class Vertices{
                 class Vertex{
                     public:
-                        inline void    set_i(const ssize_t ii) { i = ii; };
-                        inline ssize_t get_i()           const { return i; };
-                        inline void    set_degree(ssize_t dd)  { d = dd; };
-                        inline ssize_t get_degree()      const { return d; };
+                        inline void    set_i(const ssize_t ii) { index_ = ii; };
+                        inline ssize_t get_i()           const { return index_; };
+                        inline void    set_degree(ssize_t dd)  { degree_ = dd; };
+                        inline ssize_t get_degree()      const { return degree_; };
 
                     private:
-                        ssize_t i;
-                        ssize_t d;
+                        ssize_t index_;
+                        ssize_t degree_;
                 };
 
                 inline static bool desc_degree(const Vertex vi, const Vertex vj) { return (vi.get_degree() > vj.get_degree()); };
 
             public:
-                explicit Vertices(ssize_t size) : size_(0) { v = new Vertex[size]; };
+                Vertices()                    : sizeV_(0), vertices_(nullptr){};
+                explicit Vertices(ssize_t s_) : sizeV_(0), vertices_(new Vertex[s_]){};
+                ~Vertices() = default;
 
-                inline void    dispose()                  { delete [] v; };
-                inline void    sort()                     { std::sort(v, v+size_, desc_degree); };
-                inline ssize_t size()               const { return size_; };
-                inline void    push(const ssize_t ii)     { v[size_++].set_i(ii); };
-                inline void    pop()                      { size_--; };
-                inline Vertex& at(const ssize_t ii) const { return v[ii]; };
-                inline Vertex& end()                const { return v[size_ - 1]; };
+                inline void    dispose()                  { delete [] vertices_; };
+                inline void    sort()                     { std::sort(vertices_, vertices_+sizeV_, desc_degree); };
+                inline ssize_t size()               const { return sizeV_; };
+                inline void    push(const ssize_t ii)     { vertices_[sizeV_++].set_i(ii); };
+                inline void    pop()                      { sizeV_--; };
+                inline Vertex& at(const ssize_t ii) const { return vertices_[ii]; };
+                inline Vertex& end()                const { return vertices_[sizeV_ - 1]; };
                 inline void    init_colors();
                 inline void    set_degrees(FindMaxClique&);
 
             private:
-                Vertex *v;
-                ssize_t size_;
+                Vertex *vertices_;
+                ssize_t sizeV_;
         };
 
         class ColorVector{
             public:
-                ColorVector()                             : size_(0), i(nullptr){};
-                explicit ColorVector(const ssize_t size_) : size_(size_), i(nullptr){ init(size_); };
-                ~ColorVector(){ delete [] i; };
+                ColorVector()                             : sizeC_(0), colors_(nullptr){};
+                explicit ColorVector(const ssize_t s_) : sizeC_(s_), colors_(nullptr){ init(s_); };
+                ~ColorVector(){ delete [] colors_; };
 
-                inline void     init(const ssize_t csize_)    { i = new ssize_t[csize_]; rewind(); };
-                inline void     push(const ssize_t ii)        { i[size_++] = ii; };
-                inline void     pop()                         { size_--; };
-                inline void     rewind()                      { size_ = 0; };
-                inline ssize_t  size()                  const { return size_; };
-                inline ssize_t& at(const ssize_t ii)    const { return i[ii]; };
-                ColorVector& operator=(const ColorVector& dh) { for(auto j = 0; j < dh.size_; j++){ i[j] = dh.i[j]; } size_ = dh.size_; return *this; };
-                inline void     clearContent()                { delete [] i; };
+                inline void     init(const ssize_t csize_)    { colors_ = new ssize_t[csize_]; rewind(); };
+                inline void     push(const ssize_t ii)        { colors_[sizeC_++] = ii; };
+                inline void     pop()                         { sizeC_--; };
+                inline void     rewind()                      { sizeC_ = 0; };
+                inline ssize_t  size()                  const { return sizeC_; };
+                inline ssize_t& at(const ssize_t ii)    const { return colors_[ii]; };
+                ColorVector& operator=(const ColorVector& dh) { for(auto j = 0; j < dh.sizeC_; j++){ colors_[j] = dh.colors_[j]; } sizeC_ = dh.sizeC_; return *this; };
+                inline void     clearContent()                { delete [] colors_; };
 
             private:
-                ssize_t *i;
-                ssize_t size_;
+                ssize_t *colors_;
+                ssize_t sizeC_;
         };
 
         class Counter{
@@ -79,7 +78,7 @@ class FindMaxClique{
                 ssize_t i2;
         };
 
-        inline bool isConnection(const ssize_t i, const ssize_t j) const { return e[i][j]; };
+        inline bool isConnection(const ssize_t i, const ssize_t j) const { return grid[i][j]; };
         inline bool firstCut(ssize_t, const ColorVector&);
         inline void secondCut(const Vertices&, Vertices&);
         inline void SortByColors(Vertices&);
@@ -88,7 +87,7 @@ class FindMaxClique{
         inline void sortByDegree(Vertices &R) { R.set_degrees(*this); R.sort(); };
 
     public:
-        FindMaxClique(const bool* const*, ssize_t, float);
+        FindMaxClique(const T* const*, ssize_t, float);
         ~FindMaxClique(){ delete [] C; delete [] S; V.dispose(); };
 
         inline ssize_t steps() const { return stepsCount; };
@@ -100,19 +99,20 @@ class FindMaxClique{
         ColorVector *C;
         ColorVector QMAX;
         ColorVector Q;
-        const bool* const* e;
+        const T* const* grid;
         ssize_t stepsCount;
         ssize_t level;
-        size_t nrOfVertices;
+        const size_t nrOfVertices;
         const float timeSearchLimit;
         Counter *S;
 };
 
-FindMaxClique::FindMaxClique(const bool* const* conn, const ssize_t size_, const float tt) : stepsCount(0), level(1), timeSearchLimit(tt), V(size_), Q(size_), QMAX(size_), nrOfVertices(size_){
+template <typename T>
+FindMaxClique<T>::FindMaxClique(const T* const* conn, const ssize_t size_, const float tt) : stepsCount(0), level(1), timeSearchLimit(tt), V(size_), Q(size_), QMAX(size_), nrOfVertices(size_){
     assert(conn != nullptr && size_>0);
     for(auto i = 0; i < size_; i++) V.push(i);
 
-    e = conn;
+    grid = conn;
     C = new ColorVector[size_ + 1];
 
     for(auto i=0; i < size_ + 1; i++) C[i].init(size_ + 1);
@@ -120,7 +120,8 @@ FindMaxClique::FindMaxClique(const bool* const* conn, const ssize_t size_, const
     S = new Counter[size_ + 1];
 }
 
-inline void FindMaxClique::_maxCliqueAlgorithm(ssize_t* &maxclique, ssize_t &size_) {
+template <typename T>
+inline void FindMaxClique<T>::_maxCliqueAlgorithm(ssize_t* &maxclique, ssize_t &size_) {
     V.set_degrees(*this);
     V.sort();
     V.init_colors();
@@ -138,35 +139,40 @@ inline void FindMaxClique::_maxCliqueAlgorithm(ssize_t* &maxclique, ssize_t &siz
     size_ = QMAX.size();
 }
 
-inline void FindMaxClique::Vertices::init_colors() {
-    const ssize_t max_degree = v[0].get_degree();
+template <typename T>
+inline void FindMaxClique<T>::Vertices::init_colors() {
+    const ssize_t max_degree = vertices_[0].get_degree();
 
-    for(auto i = 0; i < max_degree; i++) v[i].set_degree(i + 1);
+    for(auto i = 0; i < max_degree; i++) vertices_[i].set_degree(i + 1);
 
-    for(auto i = max_degree; i < size_; i++) v[i].set_degree(max_degree + 1);
+    for(auto i = max_degree; i < sizeV_; i++) vertices_[i].set_degree(max_degree + 1);
 }
 
-inline void FindMaxClique::Vertices::set_degrees(FindMaxClique &m) {
-    for(auto i = 0; i < size_; i++){
+template <typename T>
+inline void FindMaxClique<T>::Vertices::set_degrees(FindMaxClique &m) {
+    for(auto i = 0; i < sizeV_; i++){
         auto d = 0;
 
-        for(auto j = 0; j < size_; j++) if(m.isConnection(v[i].get_i(), v[j].get_i())) d++;
+        for(auto j = 0; j < sizeV_; j++) if(m.isConnection(vertices_[i].get_i(), vertices_[j].get_i())) d++;
 
-        v[i].set_degree(d);
+        vertices_[i].set_degree(d);
     }
 }
 
-inline bool FindMaxClique::firstCut(const ssize_t pi, const ColorVector &A) {
+template <typename T>
+inline bool FindMaxClique<T>::firstCut(const ssize_t pi, const ColorVector &A) {
     for(auto i = 0; i < A.size(); i++)  if(isConnection(pi, A.at(i))) return true;
 
     return false;
 }
 
-inline void FindMaxClique::secondCut(const Vertices &A, Vertices &B) {
+template <typename T>
+inline void FindMaxClique<T>::secondCut(const Vertices &A, Vertices &B) {
     for(auto i = 0; i < A.size() - 1; i++) if(isConnection(A.end().get_i(), A.at(i).get_i())) B.push(A.at(i).get_i());
 }
 
-inline void FindMaxClique::SortByColors(Vertices &R) {
+template <typename T>
+inline void FindMaxClique<T>::SortByColors(Vertices &R) {
     ssize_t j = 0;
     ssize_t maxno = 1;
     ssize_t min_k = QMAX.size() - Q.size() + 1;
@@ -199,7 +205,8 @@ inline void FindMaxClique::SortByColors(Vertices &R) {
         }
 }
 
-inline void FindMaxClique::expand(Vertices R){
+template <typename T>
+inline void FindMaxClique<T>::expand(Vertices R){
     S[level].set_i1(S[level].get_i1() + S[level - 1].get_i1() - S[level].get_i2());
     S[level].set_i2(S[level - 1].get_i1());
 
@@ -231,14 +238,11 @@ inline void FindMaxClique::expand(Vertices R){
     }
 }
 
-void FindMaxClique::clearResources(){
+template <typename T>
+void FindMaxClique<T>::clearResources(){
     delete [] C;
     delete [] S;
     V.dispose();
-
-    for(auto i = 0; i < nrOfVertices; i++) delete [] e[i];
-    delete [] e;
-
     QMAX.clearContent();
     Q.clearContent();
 }
