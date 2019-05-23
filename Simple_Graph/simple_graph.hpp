@@ -14,7 +14,7 @@
 #include <limits>
 #include <unordered_map>
 
-#include "maxCliquesProblem.hpp"
+#include "maxCliqueAlgorithm.hpp"
 
 const double INF = std::numeric_limits<double>::max();
 
@@ -175,11 +175,11 @@ class Graph{
         inline ssize_t                                getDegree(size_t vertex_id)                     const { return getOutDegree(vertex_id); };
         inline std::vector<V>                         getConnectedVerticesTo(size_t vertex_id)              { return getOutConnectedVerticesTo(vertex_id); };
 
-        inline bool                                  edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
-        inline size_t                                nrOfVertices()                                  const { return vertices.size(); };
-        inline size_t                                nrOfEdges()                                     const { return no_of_edges; };
-        inline VerticesIterator                      vertex(std::size_t vertex_id)                         { return VerticesIterator(*this, vertex_id); };
-        inline EdgesIterator                         edge(std::size_t vertex1_id, std::size_t vertex2_id)  { return EdgesIterator(*this, vertex1_id, vertex2_id); };
+        inline bool                                   edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
+        inline size_t                                 nrOfVertices()                                  const { return vertices.size(); };
+        inline size_t                                 nrOfEdges()                                     const { return no_of_edges; };
+        inline VerticesIterator                       vertex(std::size_t vertex_id)                         { return VerticesIterator(*this, vertex_id); };
+        inline EdgesIterator                          edge(std::size_t vertex1_id, std::size_t vertex2_id)  { return EdgesIterator(*this, vertex1_id, vertex2_id); };
 
         inline VerticesIterator begin()                          { return beginVertices(); };
         inline VerticesIterator end()                            { return endVertices(); };
@@ -614,10 +614,13 @@ inline std::pair<double, std::vector<size_t>> Graph<V, E>::dijkstra(size_t start
         }
     }
 
-    path.push_back(start);
-    std::reverse(path.begin(), path.end());
+    if(distances[end] != INF) {
+        path.push_back(start);
+        std::reverse(path.begin(), path.end());
 
-    return std::make_pair(distances[end], path);
+        return std::make_pair(distances[end], path);
+    }
+    else return std::make_pair(-1, path);
 }
 
 template<typename V, typename E>
@@ -930,33 +933,15 @@ inline std::vector<V> Graph<V, E>::getInConnectedVerticesTo(size_t vertex_id){
 
 template <typename V, typename E>
 inline void Graph<V, E>::findMaxClique(){
-    bool **tempMatrix;
-    tempMatrix = new bool*[nrOfVertices()];
-    auto size_ = nrOfVertices();
-
-    for(auto i = 0; i < size_; i++){
-        tempMatrix[i] = new bool[nrOfVertices()];
-
-        for(auto j = 0; j < size_; j++){
-            if(neigh_matrix.at(i).at(j)) tempMatrix[i][j] = true;
-            else tempMatrix[i][j] = false;
-        }
-    }
-
-    FindMaxClique mc(tempMatrix, nrOfVertices(), 0.025);
-    ssize_t *maxClique;
-    ssize_t mcSize;
-    mc.maxCliqueAlgorithm(maxClique, mcSize);
+    FindMaxClique<E> mc(neigh_matrix, nrOfVertices(), 0.025);
+    std::vector<ssize_t> maxClique;
+    mc.maxCliqueAlgorithm(maxClique);
 
     std::cout << "Maximum clique: ";
-    for(auto i = 0; i < mcSize; i++) std::cout << maxClique[i] << " ";
+    for(auto i : maxClique) std::cout << i << " ";
     std::cout << std::endl;
-    std::cout << "Size = " << mcSize << std::endl;
+    std::cout << "Size = " << maxClique.size() << std::endl;
     std::cout << "Number of steps = " << mc.steps() << std::endl;
-
-    for(auto i = 0; i < nrOfVertices(); i++) delete [] tempMatrix[i];
-    delete [] tempMatrix;
-    delete [] maxClique;
 }
 
 #endif //SIMPLE_GRAPH_SIMPLE_GRAPH_HPP
