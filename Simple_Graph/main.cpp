@@ -110,9 +110,18 @@ int main(){
     }
     std::cout << std::endl;
 
-    std::tie(shortest_path_distance, shortest_path) = g.dijkstra(1u, 3u, [](const double &e) -> double { return e; });
+    std::tie(shortest_path_distance, shortest_path) = g.dijkstra(1u, 3u, [](const double &e)->double{ return e; });
     std::cout << "Distance from 1 to 3: " << shortest_path_distance << std::endl;
     std::cout << "Path from 1 to 3:" << std::endl;
+    for(auto &v_id : shortest_path)
+    {
+        std::cout << v_id << ", ";
+    }
+    std::cout << std::endl << std::endl << std::endl;
+
+	std::tie(shortest_path_distance, shortest_path) = g.AStar(1u, 0u, [](const double &e)->double{ return e; }, [](const Graph<std::string, double> &gr_, const size_t &curr, const size_t &end)->double{ return 0; });
+	std::cout << "Distance from 1 to 0: " << shortest_path_distance << std::endl;
+    std::cout << "Path from 1 to 0:" << std::endl;
     for(auto &v_id : shortest_path)
     {
         std::cout << v_id << ", ";
