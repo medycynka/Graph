@@ -2,9 +2,9 @@
 #include "AStar.hpp"
 
 int main() {
-    AStar g;
-    g.setWorldSize({15, 15});
-    g.setHeuristic(AStar::HeuristicFunctionType::euclidean);
+    AStar<bool> g;
+    g.setWorldSize({20, 20});
+    g.setHeuristic(AStar<bool>::HeuristicFunctionType::euclidean);
     g.setDiagonalMovement(true);
     g.addCollision({1, 0});
     g.addCollision({2, 0});
@@ -27,11 +27,38 @@ int main() {
     std::cout << std::endl;
     g.printWorld();
     std::cout << std::endl;
-
-    auto path = g.findPath({0, 0}, {14, 12});
-
+    auto path = g.findPath({0, 0}, {19, 4});
     std::cout << "Generated Path:" << std::endl;
-    for(auto it = path.rbegin(); it != path.rend(); ++it) std::cout << "(" << (*it).x << ", " << (*it).y << ")" << std::endl;
+    for(auto & it : path) std::cout << "(" << it.x << ", " << it.y << ")" << std::endl;
+
+    std::cout << std::endl << std::endl << std::endl;
+
+    AStar<char> c;
+    c.setWorldSize({15, 15});
+    c.setDiagonalMovement(false);
+    c.setHeuristic(AStar<char>::HeuristicFunctionType::euclidean);
+    std::vector<std::vector<char>> walls_ = { {'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w'},
+                                              {'w', 'o', 'o', 'o', 'w', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'w'},
+                                              {'w', 'o', 'o', 'o', 'w', 'o', 'o', 'o', 'o', 'o', 'w', 'w', 'w', 'o', 'w'},
+                                              {'w', 'o', 'o', 'o', 'w', 'o', 'o', 'o', 'o', 'w', 'w', 'o', 'o', 'o', 'w'},
+                                              {'w', 'o', 'o', 'o', 'w', 'o', 'o', 'o', 'o', 'w', 'w', 'o', 'o', 'o', 'w'},
+                                              {'w', 'o', 'o', 'o', 'w', 'o', 'o', 'o', 'o', 'w', 'w', 'o', 'w', 'w', 'w'},
+                                              {'w', 'o', 'o', 'o', 'w', 'o', 'w', 'w', 'o', 'w', 'o', 'o', 'w', 'w', 'w'},
+                                              {'w', 'o', 'o', 'o', 'w', 'o', 'w', 'o', 'o', 'w', 'o', 'w', 'w', 'w', 'w'},
+                                              {'w', 'o', 'o', 'o', 'w', 'o', 'w', 'o', 'o', 'w', 'o', 'w', 'w', 'w', 'w'},
+                                              {'w', 'o', 'o', 'o', 'w', 'o', 'w', 'o', 'o', 'w', 'o', 'o', 'o', 'o', 'w'},
+                                              {'w', 'o', 'o', 'o', 'w', 'w', 'w', 'o', 'o', 'w', 'o', 'w', 'o', 'o', 'w'},
+                                              {'w', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'w', 'o', 'w', 'o', 'o', 'w'},
+                                              {'w', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'w', 'o', 'w', 'o', 'o', 'w'},
+                                              {'w', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'w', 'o', 'w', 'o', 'o', 'w'},
+                                              {'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w'}
+                                            };
+    c.addCollisionsFromMatrix(walls_, [](const char &e)->bool{ return (e == 'w'); });
+    c.printWorld();
+    std::cout << std::endl;
+    auto path2 = c.findPath({1, 1}, {13, 12});
+    std::cout << "Generated Path:" << std::endl;
+    for(auto & i : path2) std::cout << "(" << i.x << ", " << i.y << ")" << std::endl;
 
     return 0;
 }

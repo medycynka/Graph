@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 
+template<typename T = bool>
 class AStar{
         struct Coords{
             ssize_t x;
@@ -20,8 +21,8 @@ class AStar{
         };
 
         struct TileNode{
-            ssize_t   G;
-            ssize_t   H;
+            ssize_t   G;        // distance from current TileNode to "startNode"
+            ssize_t   H;        // heuristic cost
             Coords    coordinates;
             TileNode *parent;
 
@@ -60,6 +61,7 @@ class AStar{
         inline void                clearCollisions()                                              { walls.clear(); };
         inline void                removeCollision(Coords coordinates_)                           { auto it = std::find(walls.begin(), walls.end(), coordinates_); if(it != walls.end()) walls.erase(it); };
         inline std::vector<Coords> findPath(Coords source_, Coords target_) const;
+        inline void                addCollisionsFromMatrix(const std::vector<std::vector<T>> &matrix, std::function<bool(const T&)> checker);
         inline void                printWorld() const;
 
     private:
@@ -70,7 +72,8 @@ class AStar{
         size_t                                directions;
 };
 
-inline std::vector<AStar::Coords> AStar::findPath(Coords source_, Coords target_) const{
+template<typename T>
+inline std::vector<typename AStar<T>::Coords> AStar<T>::findPath(Coords source_, Coords target_) const{
     TileNode *current = nullptr;
     std::set<TileNode*> openSet;
     std::set<TileNode*> closedSet;
@@ -94,7 +97,7 @@ inline std::vector<AStar::Coords> AStar::findPath(Coords source_, Coords target_
             size_t totalCost = current->G + ((i < 4) ? 10 : 14);
             TileNode *successor = findNodeOnList(openSet, newCoordinates);
 
-            if(successor == nullptr) {
+            if(successor == nullptr){
                 successor = new TileNode(newCoordinates, current);
                 successor->G = totalCost;
                 successor->H = heuristic(successor->coordinates, target_);
@@ -109,18 +112,20 @@ inline std::vector<AStar::Coords> AStar::findPath(Coords source_, Coords target_
 
     std::vector<AStar::Coords> path;
 
-    while(current != nullptr) {
+    while(current != nullptr){
         path.push_back(current->coordinates);
         current = current->parent;
     }
 
     releaseNodes(openSet);
     releaseNodes(closedSet);
+    std::reverse(path.begin(), path.end());
 
     return path;
 }
 
-void AStar::printWorld() const{
+template<typename T>
+void AStar<T>::printWorld() const{
     auto k = 0;
     auto wSize = walls.size();
     for(auto i = 0; i < worldSize.x; i++){
@@ -135,6 +140,17 @@ void AStar::printWorld() const{
             else std::cout << "O ";
         }
         std::cout << std::endl;
+    }
+}
+
+template<typename T>
+void AStar<T>::addCollisionsFromMatrix(const std::vector<std::vector<T>> &matrix, std::function<bool(const T&)> checker){
+    for(auto i = 0; i < matrix.size(); i++){
+        for(auto j = 0; j < matrix.at(i).size(); j++){
+            if(checker(matrix.at(i).at(j))){
+                addCollision({i, j});
+            }
+        }
     }
 }
 
