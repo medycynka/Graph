@@ -53,12 +53,15 @@ int main() {
                                               {'w', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'w', 'o', 'w', 'o', 'o', 'w'},
                                               {'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w'}
                                             };
-    c.addCollisionsFromMatrix(walls_, [](const char &e)->bool{ return (e == 'w'); });
+    c.addCollisionsFromVectorMatrix(walls_, [](const char &e)->bool{ return (e == 'w'); });
     c.printWorld();
     std::cout << std::endl;
     auto path2 = c.findPath({1, 1}, {13, 12});
     std::cout << "Generated Path:" << std::endl;
     for(auto & i : path2) std::cout << "(" << i.x << ", " << i.y << ")" << std::endl;
+
+    std::cout << std::endl << std::endl << std::endl;
+    c.printWorldWithPath(path2);
 
     return 0;
 }

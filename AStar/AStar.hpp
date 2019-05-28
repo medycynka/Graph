@@ -61,8 +61,9 @@ class AStar{
         inline void                clearCollisions()                                              { walls.clear(); };
         inline void                removeCollision(Coords coordinates_)                           { auto it = std::find(walls.begin(), walls.end(), coordinates_); if(it != walls.end()) walls.erase(it); };
         inline std::vector<Coords> findPath(Coords source_, Coords target_) const;
-        inline void                addCollisionsFromMatrix(const std::vector<std::vector<T>> &matrix, std::function<bool(const T&)> checker);
+        inline void                addCollisionsFromVectorMatrix(const std::vector<std::vector<T>> &matrix, std::function<bool(const T&)> checker);
         inline void                printWorld() const;
+        inline void                printWorldWithPath(const std::vector<Coords> &path_) const;
 
     private:
         std::function<size_t(Coords, Coords)> heuristic;
@@ -144,13 +145,42 @@ void AStar<T>::printWorld() const{
 }
 
 template<typename T>
-void AStar<T>::addCollisionsFromMatrix(const std::vector<std::vector<T>> &matrix, std::function<bool(const T&)> checker){
+void AStar<T>::addCollisionsFromVectorMatrix(const std::vector<std::vector<T>> &matrix, std::function<bool(const T&)> checker){
     for(auto i = 0; i < matrix.size(); i++){
         for(auto j = 0; j < matrix.at(i).size(); j++){
             if(checker(matrix.at(i).at(j))){
                 addCollision({i, j});
             }
         }
+    }
+}
+
+template<typename T>
+void AStar<T>::printWorldWithPath(const std::vector<Coords> &path_) const{
+    std::vector<std::vector<char>> pomWorld(worldSize.x, std::vector<char>(worldSize.y, 'o'));
+    auto k = 0;
+    auto wSize = walls.size();
+
+    for(auto i = 0; i < worldSize.x; i++){
+        for(auto j = 0; j < worldSize.y; j++){
+            if(k < wSize){
+                if(walls.at(k).x == i && walls.at(k).y == j){
+                    pomWorld.at(i).at(j) = 'W';
+                    k++;
+                }
+            }
+        }
+    }
+
+    for(auto i = 0; i < path_.size(); i++){
+        pomWorld.at(path_.at(i).x).at(path_.at(i).y) = 'x';
+    }
+
+    for(auto i = 0; i < worldSize.x; i++){
+        for(auto j = 0; j < worldSize.y; j++){
+            std::cout << pomWorld.at(i).at(j) << " ";
+        }
+        std::cout << std::endl;
     }
 }
 
