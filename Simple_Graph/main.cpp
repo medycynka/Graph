@@ -119,14 +119,14 @@ int main(){
     }
     std::cout << std::endl << std::endl << std::endl;
 
-	std::tie(shortest_path_distance, shortest_path) = g.AStar(1u, 0u, [](const double &e)->double{ return e; }, [](const Graph<std::string, double> &gr_, const size_t &curr, const size_t &end)->double{ return 0; });
-	std::cout << "Distance from 1 to 0: " << shortest_path_distance << std::endl;
+    std::tie(shortest_path_distance, shortest_path) = g.AStar(1u, 0u, [](const double &e)->double{ return e; }, [](const Graph<std::string, double> &gr_, const size_t &curr, const size_t &end)->double{ return 0; });
+    std::cout << "A* algorithm:" << std::endl << "Distance from 1 to 0: " << shortest_path_distance << std::endl;
     std::cout << "Path from 1 to 0:" << std::endl;
     for(auto &v_id : shortest_path)
     {
         std::cout << v_id << ", ";
     }
-    std::cout << std::endl;
+    std::cout << std::endl << std::endl;
 
     /*std::cout << std::endl << std::endl;
     g.computeFloydWarshall();
@@ -170,7 +170,6 @@ int main(){
     g3.insertEdge(2, 1, 1);
     g3.printNeighborhoodMatrix();
     std::cout << std::endl << (g3.hasCycle_undirected() ? "Graph g3 has cycle" : "Graph g3 doesn't have cycles") << std::endl << std::endl;
-
     Graph<size_t, size_t> g4;
     g4.insertVertex(0);
     g4.insertVertex(1);
@@ -187,7 +186,7 @@ int main(){
     g4.printNeighborhoodMatrix();
     g4.hasHamiltonCycle(1);
     std::cout << std::endl;
-
+    */
     Graph<size_t, size_t> g5;
     g5.insertVertex(0);
     g5.insertVertex(1);
@@ -238,5 +237,5 @@ int main(){
     g5.printNeighborhoodMatrix();
     std::cout << std::endl;
     g5.findMaxClique();
-    std::cout << std::endl;*/
+    std::cout << std::endl;
 }

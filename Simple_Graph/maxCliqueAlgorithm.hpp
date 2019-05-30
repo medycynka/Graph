@@ -4,6 +4,8 @@
 #pragma once
 #include <algorithm>
 #include <cassert>
+#include <vector>
+#include <optional>
 
 template <typename T = bool>
 class FindMaxClique{
