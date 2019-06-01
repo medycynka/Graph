@@ -120,6 +120,7 @@ inline std::vector<typename AStar<T>::Coords> AStar<T>::findPath(Coords source_,
 
     releaseNodes(openSet);
     releaseNodes(closedSet);
+    delete current;
     std::reverse(path.begin(), path.end());
 
     return path;
@@ -129,6 +130,9 @@ template<typename T>
 void AStar<T>::printWorld() const{
     auto k = 0;
     auto wSize = walls.size();
+
+    std::cout<< "Generated World:" << std::endl;
+
     for(auto i = 0; i < worldSize.x; i++){
         for(auto j = 0; j < worldSize.y; j++){
             if(k < wSize){
@@ -175,6 +179,8 @@ void AStar<T>::printWorldWithPath(const std::vector<Coords> &path_) const{
     for(auto i = 0; i < path_.size(); i++){
         pomWorld.at(path_.at(i).x).at(path_.at(i).y) = 'x';
     }
+
+    std::cout << "Generated path:" << std::endl;
 
     for(auto i = 0; i < worldSize.x; i++){
         for(auto j = 0; j < worldSize.y; j++){
