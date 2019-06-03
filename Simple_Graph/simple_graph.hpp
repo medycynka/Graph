@@ -14,6 +14,7 @@
 #include <limits>
 #include <unordered_map>
 #include <iomanip>
+#include <iterator>
 
 #include "maxCliqueAlgorithm.hpp"
 
@@ -25,17 +26,23 @@ private:
     class VerticesIterator{
     protected:
         size_t curr_It;
-        Graph<V, E> &reference;
+        Graph<V, E> &ref;
 
-        VerticesIterator(Graph<V, E> &graph, std::size_t current_vertex_id) : reference(graph), curr_It(current_vertex_id){};
+        VerticesIterator(Graph<V, E> &graph, std::size_t current_vertex_id) : ref(graph), curr_It(current_vertex_id){};
 
     public:
         friend class Graph;
+		typedef VerticesIterator self_type;
+		typedef V value_type;
+		typedef V& reference;
+		typedef V* pointer;
+		typedef std::forward_iterator_tag iterator_category;
+		typedef int difference_type;
 
-        VerticesIterator(const VerticesIterator &s)                         : reference(s.reference), curr_It(s.curr_It){};
-        VerticesIterator(VerticesIterator &&s) noexcept                     : reference(s.reference), curr_It(s.curr_It){};
+        VerticesIterator(const VerticesIterator &s)                         : ref(s.ref), curr_It(s.curr_It){};
+        VerticesIterator(VerticesIterator &&s) noexcept                     : ref(s.ref), curr_It(s.curr_It){};
 
-        bool                   operator==(const VerticesIterator &vi) const { return (curr_It == vi.curr_It && reference == vi.reference); };
+        bool                   operator==(const VerticesIterator &vi) const { return (curr_It == vi.curr_It && ref == vi.ref); };
         bool                   operator!=(const VerticesIterator &vi) const { return !(*this == vi); };
         VerticesIterator&      operator++();
         VerticesIterator const operator++(int);
@@ -43,9 +50,12 @@ private:
         VerticesIterator const operator--(int);
         VerticesIterator&      operator+=(size_t count);
         VerticesIterator&      operator-=(size_t count);
-        V &                    operator* ()     const { return reference.vertices.at(curr_It); };
-        V *                    operator->()     const { return *(reference.vertices.at(curr_It)); };
-        explicit               operator  bool() const { return curr_It != reference.nrOfVertices(); };
+        V &                    operator* ()     const { return ref.vertices.at(curr_It); };
+        V *                    operator->()     const { return *(ref.vertices.at(curr_It)); };
+        explicit               operator  bool() const { return curr_It != ref.nrOfVertices(); };
+		size_t                 id()                   { return curr_It; };
+		const size_t           id()             const { return curr_It; };
+
     };
 
     class EdgesIterator{
@@ -182,7 +192,9 @@ public:
     inline size_t                                     nrOfEdges()                                     const { return no_of_edges; };
     inline VerticesIterator                           vertex(std::size_t vertex_id)                         { return VerticesIterator(*this, vertex_id); };
     inline EdgesIterator                              edge(std::size_t vertex1_id, std::size_t vertex2_id)  { return EdgesIterator(*this, vertex1_id, vertex2_id); };
-    inline std::vector<std::vector<std::optional<E>>> getNeighMatrix() const { return neigh_matrix; };
+    inline std::vector<std::vector<std::optional<E>>> getNeighMatrix() const                                { return neigh_matrix; };
+	inline V&                                         vertexData(size_t id)                                 { return vertices.at(id); };
+	inline const V&                                   vertexData(size_t id)                           const { return vertices.at(id); };
 
     inline VerticesIterator begin()                          { return beginVertices(); };
     inline VerticesIterator end()                            { return endVertices(); };
@@ -992,13 +1004,14 @@ inline std::pair<double, std::vector<size_t>> Graph<V, E>::AStar(size_t start, s
         if(distances[smallest] == INF) break;
 
         for(auto i = 0; i < size_; i++){
-            auto alt = distances[smallest] + visitator_f(neigh_matrix.at(smallest).at(i).value_or(INF)) + visitator_f(heuristic(*this, smallest, i));
-
-            if(alt < distances[i]){
-                distances[i] = alt;
-                previous[i] = smallest;
-                std::make_heap(nodes.begin(), nodes.end(), comparator);
-            }
+			auto heu = visitator_f(heuristic(*this, smallest, i));
+            auto alt = distances[smallest] + visitator_f(neigh_matrix.at(smallest).at(i).value_or(INF));
+			
+			if(alt < distances[i]){
+		        distances[i] = alt;
+		        previous[i] = smallest;
+		        std::make_heap(nodes.begin(), nodes.end(), comparator);
+		    }
         }
     }
 
