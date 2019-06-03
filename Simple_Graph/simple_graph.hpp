@@ -32,12 +32,12 @@ private:
 
     public:
         friend class Graph;
-		typedef VerticesIterator self_type;
-		typedef V value_type;
-		typedef V& reference;
-		typedef V* pointer;
-		typedef std::forward_iterator_tag iterator_category;
-		typedef int difference_type;
+        typedef VerticesIterator self_type;
+        typedef V value_type;
+        typedef V& reference;
+        typedef V* pointer;
+        typedef std::forward_iterator_tag iterator_category;
+        typedef int difference_type;
 
         VerticesIterator(const VerticesIterator &s)                         : ref(s.ref), curr_It(s.curr_It){};
         VerticesIterator(VerticesIterator &&s) noexcept                     : ref(s.ref), curr_It(s.curr_It){};
@@ -53,8 +53,8 @@ private:
         V &                    operator* ()     const { return ref.vertices.at(curr_It); };
         V *                    operator->()     const { return *(ref.vertices.at(curr_It)); };
         explicit               operator  bool() const { return curr_It != ref.nrOfVertices(); };
-		size_t                 id()                   { return curr_It; };
-		const size_t           id()             const { return curr_It; };
+        size_t                 id()                   { return curr_It; };
+        const size_t           id()             const { return curr_It; };
 
     };
 
@@ -62,24 +62,30 @@ private:
     protected:
         size_t curr_row;
         size_t curr_col;
-        Graph<V, E> &reference;
+        Graph<V, E> &ref;
 
         explicit EdgesIterator(Graph<V, E> &graph);
-        EdgesIterator(Graph<V, E> &graph, std::size_t nm_row, std::size_t nm_col) : reference(graph), curr_row(nm_row), curr_col(nm_col){};
+        EdgesIterator(Graph<V, E> &graph, std::size_t nm_row, std::size_t nm_col) : ref(graph), curr_row(nm_row), curr_col(nm_col){};
 
     public:
         friend class Graph;
+        typedef EdgesIterator self_type;
+        typedef V value_type;
+        typedef V& reference;
+        typedef V* pointer;
+        typedef std::forward_iterator_tag iterator_category;
+        typedef int difference_type;
 
-        EdgesIterator(const EdgesIterator &s)                                     : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
-        EdgesIterator(EdgesIterator &&s) noexcept                                 : reference(s.reference), curr_row(s.curr_row), curr_col(s.curr_col){};
+        EdgesIterator(const EdgesIterator &s)                                     : ref(s.ref), curr_row(s.curr_row), curr_col(s.curr_col){};
+        EdgesIterator(EdgesIterator &&s) noexcept                                 : ref(s.ref), curr_row(s.curr_row), curr_col(s.curr_col){};
 
-        bool                operator==(const EdgesIterator &ei) const { return (curr_row == ei.curr_row && curr_col == ei.curr_col && reference == ei.reference); };
+        bool                operator==(const EdgesIterator &ei) const { return (curr_row == ei.curr_row && curr_col == ei.curr_col && ref == ei.ref); };
         bool                operator!=(const EdgesIterator &ei) const { return !(*this == ei); };
         EdgesIterator&      operator++();
         EdgesIterator const operator++(int);
-        E&                  operator* () const { return reference.neigh_matrix.at(curr_row).at(curr_col).value(); };
-        E*                  operator->() const { return *(reference.neigh_matrix.at(curr_row).at(curr_col).value()); };
-        explicit            operator  bool() const { return curr_row != reference.nrOfVertices(); };
+        E&                  operator* () const { return ref.neigh_matrix.at(curr_row).at(curr_col).value(); };
+        E*                  operator->() const { return *(ref.neigh_matrix.at(curr_row).at(curr_col).value()); };
+        explicit            operator  bool() const { return curr_row != ref.nrOfVertices(); };
     };
 
     class dfsIterator{
@@ -193,8 +199,8 @@ public:
     inline VerticesIterator                           vertex(std::size_t vertex_id)                         { return VerticesIterator(*this, vertex_id); };
     inline EdgesIterator                              edge(std::size_t vertex1_id, std::size_t vertex2_id)  { return EdgesIterator(*this, vertex1_id, vertex2_id); };
     inline std::vector<std::vector<std::optional<E>>> getNeighMatrix() const                                { return neigh_matrix; };
-	inline V&                                         vertexData(size_t id)                                 { return vertices.at(id); };
-	inline const V&                                   vertexData(size_t id)                           const { return vertices.at(id); };
+    inline V&                                         vertexData(size_t id)                                 { return vertices.at(id); };
+    inline const V&                                   vertexData(size_t id)                           const { return vertices.at(id); };
 
     inline VerticesIterator begin()                          { return beginVertices(); };
     inline VerticesIterator end()                            { return endVertices(); };
@@ -258,19 +264,19 @@ typename Graph<V, E>::VerticesIterator &Graph<V, E>::VerticesIterator::operator-
 }
 
 template<typename V, typename E>
-Graph<V, E>::EdgesIterator::EdgesIterator(Graph<V, E> &graph) : reference(graph), curr_row(0), curr_col(0){
-    bool checker = (reference.neigh_matrix.at(curr_row).at(curr_col) ? true : false);
+Graph<V, E>::EdgesIterator::EdgesIterator(Graph<V, E> &graph) : ref(graph), curr_row(0), curr_col(0){
+    bool checker = (ref.neigh_matrix.at(curr_row).at(curr_col) ? true : false);
 
     while(!checker){
         curr_col++;
 
-        if(curr_col == reference.neigh_matrix.size()){
+        if(curr_col == ref.neigh_matrix.size()){
             curr_row++;
             curr_col = 0;
         }
 
-        if(curr_row == reference.neigh_matrix.size()) checker = true;
-        else if(reference.neigh_matrix.at(curr_row).at(curr_col)) checker = true;
+        if(curr_row == ref.neigh_matrix.size()) checker = true;
+        else if(ref.neigh_matrix.at(curr_row).at(curr_col)) checker = true;
     }
 }
 
@@ -281,13 +287,13 @@ typename Graph<V, E>::EdgesIterator &Graph<V, E>::EdgesIterator::operator++(){
     while(!checker){
         curr_col++;
 
-        if(curr_col == reference.nrOfVertices()){
+        if(curr_col == ref.nrOfVertices()){
             curr_row++;
             curr_col = 0;
         }
 
-        if(curr_row == reference.nrOfVertices()) checker = true;
-        else if(reference.neigh_matrix.at(curr_row).at(curr_col)) checker = true;
+        if(curr_row == ref.nrOfVertices()) checker = true;
+        else if(ref.neigh_matrix.at(curr_row).at(curr_col)) checker = true;
     }
 
     return *this;
@@ -1004,14 +1010,14 @@ inline std::pair<double, std::vector<size_t>> Graph<V, E>::AStar(size_t start, s
         if(distances[smallest] == INF) break;
 
         for(auto i = 0; i < size_; i++){
-			auto heu = visitator_f(heuristic(*this, smallest, i));
-            auto alt = distances[smallest] + visitator_f(neigh_matrix.at(smallest).at(i).value_or(INF));
-			
-			if(alt < distances[i]){
-		        distances[i] = alt;
-		        previous[i] = smallest;
-		        std::make_heap(nodes.begin(), nodes.end(), comparator);
-		    }
+            auto alt = distances[smallest] + visitator_f(neigh_matrix.at(smallest).at(i).value_or(INF)) + heuristic(*this, smallest, i);
+            //auto alt = visitator_f(std::sqrt((smallest - end)*(smallest - end) + (i - end)*(i - end)) - heuristic(*this, smallest, i));
+
+            if(alt < distances[i]){
+                distances[i] = alt;
+                previous[i] = smallest;
+                std::make_heap(nodes.begin(), nodes.end(), comparator);
+            }
         }
     }
 
