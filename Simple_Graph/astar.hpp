@@ -55,7 +55,7 @@ std::pair<double, std::vector<std::size_t>> astar(Graph<V, E> &graph, std::size_
             if(distances.find(i) == distances.end() || alt < distances[i]){
                 distances[i] = alt;
                 previous[i] = current;
-                frontier.put(i, alt+heuristics(graph, i, end_idx));
+                frontier.put(i, alt+heuristics(graph, current, end_idx));
             }
         }
     }

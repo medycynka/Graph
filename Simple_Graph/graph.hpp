@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <iomanip>
 #include <iterator>
+#include <exception>
 
 #include "maxCliqueAlgorithm.hpp"
 
@@ -32,12 +33,12 @@ class Graph{
 
             public:
                 friend class Graph;
-                typedef VerticesIterator self_type;
-                typedef V value_type;
-                typedef V& reference;
-                typedef V* pointer;
+                typedef VerticesIterator          self_type;
+                typedef V                         value_type;
+                typedef V&                        reference;
+                typedef V*                        pointer;
                 typedef std::forward_iterator_tag iterator_category;
-                typedef int difference_type;
+                typedef int                       difference_type;
 
                 VerticesIterator(const VerticesIterator &s)                         : ref(s.ref), curr_It(s.curr_It){};
                 VerticesIterator(VerticesIterator &&s) noexcept                     : ref(s.ref), curr_It(s.curr_It){};
@@ -68,12 +69,12 @@ class Graph{
 
             public:
                 friend class Graph;
-                typedef EdgesIterator self_type;
-                typedef E value_type;
-                typedef E& reference;
-                typedef E* pointer;
+                typedef EdgesIterator             self_type;
+                typedef E                         value_type;
+                typedef E&                        reference;
+                typedef E*                        pointer;
                 typedef std::forward_iterator_tag iterator_category;
-                typedef int difference_type;
+                typedef int                       difference_type;
 
                 EdgesIterator(const EdgesIterator &s)                                     : ref(s.ref), curr_row(s.curr_row), curr_col(s.curr_col){};
                 EdgesIterator(EdgesIterator &&s) noexcept                                 : ref(s.ref), curr_row(s.curr_row), curr_col(s.curr_col){};
@@ -87,6 +88,8 @@ class Graph{
                 explicit                        operator  bool() const { return curr_row != ref.nrOfVertices(); };
                 std::pair<size_t, size_t>       id()                   { return std::make_pair(curr_row, curr_col); };
                 const std::pair<size_t, size_t> id()             const { return std::make_pair(curr_row, curr_col); };
+                std::size_t                     v1id()           const { return curr_row; };
+                std::size_t                     v2id()           const { return curr_col; };
         };
 
         class dfsIterator{
@@ -101,15 +104,15 @@ class Graph{
 
             public:
                 friend class Graph;
-                typedef dfsIterator self_type;
-                typedef V value_type;
-                typedef V& reference;
-                typedef V* pointer;
+                typedef dfsIterator               self_type;
+                typedef V                         value_type;
+                typedef V&                        reference;
+                typedef V*                        pointer;
                 typedef std::forward_iterator_tag iterator_category;
-                typedef int difference_type;
+                typedef int                       difference_type;
 
-                dfsIterator(const dfsIterator &other)                         : ref(other.ref), current(other.current), visited(other.visited), s(other.s), count(other.count){};
-                dfsIterator(dfsIterator &&other) noexcept                     : ref(other.ref), current(other.current), visited(other.visited), s(other.s), count(other.count){};
+                dfsIterator(const dfsIterator &other)                     : ref(other.ref), current(other.current), visited(other.visited), s(other.s), count(other.count){};
+                dfsIterator(dfsIterator &&other) noexcept                 : ref(other.ref), current(other.current), visited(other.visited), s(other.s), count(other.count){};
 
                 bool              operator==(const dfsIterator &vi) const { return (current == vi.current && ref == vi.ref); };
                 bool              operator!=(const dfsIterator &vi) const { return !(*this == vi); };
@@ -134,15 +137,15 @@ class Graph{
 
             public:
                 friend class Graph;
-                typedef bfsIterator self_type;
-                typedef V value_type;
-                typedef V& reference;
-                typedef V* pointer;
+                typedef bfsIterator               self_type;
+                typedef V                         value_type;
+                typedef V&                        reference;
+                typedef V*                        pointer;
                 typedef std::forward_iterator_tag iterator_category;
-                typedef int difference_type;
+                typedef int                       difference_type;
 
-                bfsIterator(const bfsIterator &other)                         : ref(other.ref), current(other.current), visited(other.visited), s(other.s), count(other.count){};
-                bfsIterator(bfsIterator &&other) noexcept                     : ref(other.ref), current(other.current), visited(other.visited), s(other.s), count(other.count){};
+                bfsIterator(const bfsIterator &other)                     : ref(other.ref), current(other.current), visited(other.visited), s(other.s), count(other.count){};
+                bfsIterator(bfsIterator &&other) noexcept                 : ref(other.ref), current(other.current), visited(other.visited), s(other.s), count(other.count){};
 
                 bool              operator==(const bfsIterator &vi) const { return (current == vi.current && ref == vi.ref); };
                 bool              operator!=(const bfsIterator &vi) const { return !(*this == vi); };
@@ -176,6 +179,17 @@ class Graph{
         inline void                                       printNeighborhoodMatrix() const;
         inline void                                       dfs(size_t start, std::function<void(const V&)> visitator_f);
         inline void                                       bfs(size_t start, std::function<void(const V&)> visitator_f);
+        inline bool                                       edgeExist(size_t vertex1_id, size_t vertex2_id)           const { return neigh_matrix[vertex1_id][vertex2_id]; };
+        inline size_t                                     nrOfVertices()                                            const { return vertices.size(); };
+        inline size_t                                     nrOfEdges()                                               const { return no_of_edges; };
+        inline VerticesIterator                           vertex(std::size_t vertex_id)                                   { return (vertex_id < nrOfVertices() ? VerticesIterator(*this, vertex_id) : endVertices()); };
+        inline EdgesIterator                              edge(std::size_t vertex1_id, std::size_t vertex2_id)            { return (neigh_matrix.at(vertex1_id).at(vertex2_id) ? EdgesIterator(*this, vertex1_id, vertex2_id) : endEdges()); };
+        inline std::vector<std::vector<std::optional<E>>> getNeighMatrix() const                                          { return neigh_matrix; };
+        inline std::vector<size_t>                        getNeighbours(size_t id)                                  const { std::vector<size_t> ret; for(auto i = 0; i < nrOfVertices(); i++){ if(neigh_matrix.at(id).at(i)){ ret.push_back(i); } } return ret; }
+        inline V&                                         vertexData(size_t id)                                           { if(id < 0 || id > nrOfVertices()){ throw std::out_of_range("Wrong id"); }else{ return vertices.at(id); } };
+        inline const V&                                   vertexData(size_t id)                                     const { if(id < 0 || id > nrOfVertices()){ throw std::out_of_range("Wrong id"); }else{ return vertices.at(id); } };
+        inline const E&                                   edgeLabel(std::size_t vertex1_id, std::size_t vertex2_id) const { if(neigh_matrix.at(vertex1_id).at(vertex2_id)){ return neigh_matrix.at(vertex1_id).at(vertex2_id).value(); }else{ throw std::bad_optional_access(); } };
+        inline E&                                         edgeLabel(std::size_t vertex1_id, std::size_t vertex2_id)       { if(neigh_matrix.at(vertex1_id).at(vertex2_id)){ return neigh_matrix.at(vertex1_id).at(vertex2_id).value(); }else{ throw std::bad_optional_access(); } };
 
         /** Graph's algorithms */
         inline size_t                                     getMinVertex(std::vector<bool> &vis, std::vector<double> &keys) const;
@@ -207,15 +221,6 @@ class Graph{
         inline void                                       findMaxClique();
         inline ssize_t                                    getDegree(size_t vertex_id)                     const { return getOutDegree(vertex_id); };
         inline std::vector<V>                             getConnectedVerticesTo(size_t vertex_id)              { return getOutConnectedVerticesTo(vertex_id); };
-
-        inline bool                                       edgeExist(size_t vertex1_id, size_t vertex2_id) const { return neigh_matrix[vertex1_id][vertex2_id]; };
-        inline size_t                                     nrOfVertices()                                  const { return vertices.size(); };
-        inline size_t                                     nrOfEdges()                                     const { return no_of_edges; };
-        inline VerticesIterator                           vertex(std::size_t vertex_id)                         { return VerticesIterator(*this, vertex_id); };
-        inline EdgesIterator                              edge(std::size_t vertex1_id, std::size_t vertex2_id)  { return EdgesIterator(*this, vertex1_id, vertex2_id); };
-        inline std::vector<std::vector<std::optional<E>>> getNeighMatrix() const                                { return neigh_matrix; };
-        inline V&                                         vertexData(size_t id)                                 { return vertices.at(id); };
-        inline const V&                                   vertexData(size_t id)                           const { return vertices.at(id); };
 
         inline VerticesIterator begin()                          { return beginVertices(); };
         inline VerticesIterator end()                            { return endVertices(); };
