@@ -1,9 +1,7 @@
 from typing import TypeVar, Generic
 import numpy as np
 from collections import deque
-from dijkstra_algorithm import dijkstra
-from a_star_algorithm import a_star
-from max_clique_algorithm import FindMaxClique
+import networkx as nx
 
 
 V = TypeVar('V')
@@ -12,10 +10,13 @@ INF = np.inf
 
 
 class Graph(Generic[V, E]):
-    def __init__(self):
+    def __init__(self, mat_: np.matrix = None):
         self.__vertices = []
-        mat = np.zeros((1, 1))
-        self.__matrix = np.full_like(mat, INF)
+        if mat_ is None:
+            mat = np.zeros((1, 1))
+            self.__matrix = np.full_like(mat, INF)
+        else:
+            self.__matrix = mat_
         self.__num_of_edges = 0
 
     def __str__(self) -> str:
@@ -47,6 +48,117 @@ class Graph(Generic[V, E]):
             ret_str += "]\n"
         return ret_str
 
+    def __eq__(self, other: 'Graph[V, E]') -> bool:
+        return self.__num_of_edges == other.__num_of_edges and self.__vertices == other.__vertices and \
+               self.__matrix == other.__matrix
+
+    def __ne__(self, other: 'Graph[V, E]') -> bool:
+        return not self == other
+
+    def __add__(self, other: V or 'tuple(V, V, E)') -> 'Graph[V, E]':
+        if isinstance(other, tuple):
+            (v1, v2, e_) = other
+            self.insert_edge(v1, v2, e_)
+        else:
+            self.insert_vertex(other)
+        return self
+
+    def __radd__(self, other: V or 'tuple(V, V, E)') -> 'Graph[V, E]':
+        return self + other
+
+    def __iadd__(self, other: V or 'tuple(V, V, E)') -> 'Graph[V, E]':
+        return self + other
+
+    def __sub__(self, other: V or 'tuple(V, V)') -> 'Graph[V, E]':
+        if isinstance(other, tuple):
+            (v1, v2) = other
+            self.remove_edge(v1, v2)
+        else:
+            self.remove_vertex(other)
+        return self
+
+    def __rsub__(self, other: V or 'tuple(V, V)') -> 'Graph[V, E]':
+        return self - other
+
+    def __isub__(self, other: V or 'tuple(V, V)') -> 'Graph[V, E]':
+        return self - other
+
+    def __getitem__(self, item: V or 'tuple(V, V)'):
+        if isinstance(item, tuple):
+            (v1, v2) = item
+            return self.__matrix[v1][v2]
+        else:
+            return self.__vertices[item]
+
+    def __setitem__(self, key: V or 'tuple(V, V)', value: V or E):
+        if isinstance(key, tuple):
+            (v1, v2) = key
+            if self.__matrix[v1][v2] == INF:
+                self.__num_of_edges += 1
+            self.__matrix[v1][v2] = value
+        else:
+            if value not in self.__vertices:
+                self.__vertices[key] = value
+
+    def __delitem__(self, key: V or 'tuple(V, V)'):
+        if isinstance(key, tuple):
+            (v1, v2) = key
+            self.remove_edge(v1, v2)
+        else:
+            self.remove_vertex(key)
+
+    # iterator krawedzi
+    def __iter__(self):
+        self.cur_row = 0
+        self.cur_col = 0
+        checker = self.__matrix[self.cur_row][self.cur_col] != INF
+        while not checker:
+            self.cur_col += 1
+            if self.cur_col == self.get_number_of_vertices():
+                self.cur_row += 1
+                self.cur_col = 0
+            if self.cur_row == self.get_number_of_vertices():
+                checker = True
+            elif self.__matrix[self.cur_row][self.cur_col] != INF:
+                checker = True
+        return self
+
+    def __next__(self) -> E:
+        if self.cur_row == self.get_number_of_vertices():
+            raise StopIteration
+        else:
+            ret = self.__matrix[self.cur_row][self.cur_col]
+            checker = False
+            while not checker:
+                self.cur_col += 1
+                if self.cur_col == self.get_number_of_vertices():
+                    self.cur_row += 1
+                    self.cur_col = 0
+                if self.cur_row == self.get_number_of_vertices():
+                    checker = True
+                elif self.__matrix[self.cur_row][self.cur_col] != INF:
+                    checker = True
+            return ret
+
+    def __round__(self, n=None):
+        np.round(self.__matrix, n)
+
+    def __floor__(self):
+        np.floor(self.__matrix)
+
+    def __ceil__(self):
+        np.ceil(self.__matrix)
+
+    def __bool__(self) -> bool:
+        return len(self.__vertices) != 0 and self.__num_of_edges != 0
+
+    def __contains__(self, item: V or 'tuple(V, V)') -> bool:
+        if isinstance(item, tuple):
+            (v1, v2) = item
+            return self.__matrix[v1][v2] != INF
+        else:
+            return item in self.__vertices
+
     def get_number_of_vertices(self) -> int:
         return len(self.__vertices)
 
@@ -75,9 +187,10 @@ class Graph(Generic[V, E]):
         del self.__vertices[vertex_id]
         counter = 0
         for i in range(len(self.__vertices)):
-            if self.__matrix[vertex_id][i] != 0 or self.__matrix[i][vertex_id] != 0:
+            if self.__matrix[vertex_id][i] != INF or self.__matrix[i][vertex_id] != INF:
                 counter += 1
-        if self.__matrix[vertex_id][vertex_id] != 0:
+        counter *= 2
+        if self.__matrix[vertex_id][vertex_id] != INF:
             counter -= 1
         if counter > 0:
             self.__num_of_edges -= counter
@@ -224,24 +337,42 @@ class Graph(Generic[V, E]):
 
         return chromatic_number, chromatic_number < size_
 
-    def find_max_clique(self, print_and_return: bool = False):
+    def __get_temp_matrix_for_nx(self):
         size_ = self.get_number_of_vertices()
-        temp_mat = np.zeros((size_, size_), dtype=bool)
+        temp_mat = np.ones((size_, size_), dtype=int)
         for i in range(size_):
             for j in range(size_):
-                if self.__matrix[i][j] != INF:
-                    temp_mat[i][j] = True
-        mc = FindMaxClique(temp_mat, size_, 0.025)
-        max_clique = []
-        mc.max_clique_algorithm(max_clique)
-        if print_and_return:
-            print("Maximum clique:\n"
-                  "{0}\n"
-                  "Size = {1}\n"
-                  "Number of steps = {2}\n".format(max_clique, len(max_clique), mc.step_cout))
-            return max_clique
+                if self.__matrix[i][j] == INF:
+                    temp_mat[i][j] = 0
+        graph_ = nx.from_numpy_matrix(temp_mat)
+        del temp_mat
+        return graph_
+
+    def find_max_clique(self, recursive_: bool = False, print_and_return: bool = False):
+        graph_ = self.__get_temp_matrix_for_nx()
+
+        if recursive_:
+            ret_ = list(nx.find_cliques_recursive(graph_))
         else:
-            return max_clique
+            ret_ = list(nx.find_cliques(graph_))
+
+        if print_and_return:
+            print("Found maximum clique(s): {0}".format(ret_))
+        return ret_
+
+    def fin_all_cliques_of_given_size(self, size_: int = 1, print_and_return: bool = False):
+        if size_ < 1:
+            print("There is no clique with size < 1")
+            return []
+        elif size_ > self.get_number_of_vertices():
+            print("There is no clique with size > number of vertices in this graph")
+            return []
+
+        graph_ = self.__get_temp_matrix_for_nx()
+        ret_ = [c_ for c_ in nx.enumerate_all_cliques(graph_) if len(c_) > size_-1]
+        if print_and_return:
+            print("All cliques with size > {0}: {1}".format(size_-1, ret_))
+        return ret_
 
     def __check_vertices_dfs(self, curr: int, vis, parent: int) -> bool:
         vis.add(curr)
@@ -334,38 +465,3 @@ class Graph(Generic[V, E]):
 
         print("Eulerian path: {0}".format(path + [curr+1]))
         return path + [curr+1]
-
-
-if __name__ == '__main__':
-    g = Graph[int, int]()
-    g.insert_vertex(0)
-    g.insert_vertex(1)
-    g.insert_vertex(2)
-    g.insert_vertex(3)
-    g.insert_vertex(4)
-    g.insert_edge(0, 1, 1)
-    g.insert_edge(0, 3, 1)
-    g.insert_edge(1, 0, 1)
-    g.insert_edge(1, 2, 1)
-    g.insert_edge(1, 3, 1)
-    g.insert_edge(1, 4, 1)
-    g.insert_edge(2, 1, 1)
-    g.insert_edge(2, 4, 1)
-    g.insert_edge(3, 0, 1)
-    g.insert_edge(3, 1, 1)
-    g.insert_edge(3, 4, 1)
-    g.insert_edge(4, 1, 1)
-    g.insert_edge(4, 2, 1)
-    g.insert_edge(4, 3, 1)
-    print(g)
-    print(repr(g))
-    print(g.dfs(0, lambda x: x))
-    print(g.bfs(0, lambda x: x), "\n")
-    g.prim_mst()
-    cd, pd = dijkstra(g, 3, 1)
-    ca, pa = a_star(g, 3, 1)
-    print("\nDijkstra algorithm from node 3 to node 1:\nCost = {0}, path: {1}".format(cd, pd))
-    print("A* algorithm from node 3 to node 1:\nCost = {0}, path: {1}\n".format(ca, pa))
-    g.color_until_done()
-    g.has_hamilton_cycle(True)
-    g.find_eulerian_path()
