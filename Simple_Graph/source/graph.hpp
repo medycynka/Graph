@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <iterator>
 #include <exception>
+#include <initializer_list>
 
 
 const double INF = std::numeric_limits<double>::max();
@@ -166,8 +167,10 @@ public:
     Graph& operator=(Graph&&) noexcept = default;
 
     explicit Graph(std::vector<V> &in)                                                         : vertices(in){};
-    Graph(std::vector<V> &in_v, std::vector<std::vector<std::optional<E>>> &in_m)              : vertices(in_v), neigh_matrix(in_m){};
     Graph(std::vector<V> &in_v, std::vector<std::vector<std::optional<E>>> &in_m, size_t in_e) : vertices(in_v), neigh_matrix(in_m), no_of_edges(in_e){};
+    Graph(std::initializer_list<V> init) {for(auto &e : init){ insertVertex(e); } };
+    Graph(std::pair<std::initializer_list<V>, std::initializer_list<std::pair<std::pair<size_t, size_t>, E>>> &init);
+
 
     bool operator==(const Graph &other) { return (no_of_edges == other.no_of_edges && vertices == other.vertices && neigh_matrix == other.neigh_matrix); };
     bool operator!=(const Graph &other) { return !(*this == other); };
@@ -411,6 +414,17 @@ typename Graph<V, E>::bfsIterator const Graph<V, E>::bfsIterator::operator++(int
     ++(*this);
 
     return *this;
+}
+
+template<typename V, typename E>
+Graph<V, E>::Graph(std::pair<std::initializer_list<V>, std::initializer_list<std::pair<std::pair<size_t, size_t>, E>>> &init) {
+    for(auto &e : init.first){
+        insertVertex(e);
+    }
+
+    for(auto &p : init.second){
+        insertEdge(p.first.first, p.first.second, p.second);
+    }
 }
 
 template <typename V, typename E>
